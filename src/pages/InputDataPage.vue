@@ -1,5 +1,5 @@
 <template>
-    <HeaderAdmin />
+    <PageHeader />
     <div class="heading">
         <h4>Ввод данных для расчета</h4>
     </div>
@@ -34,7 +34,7 @@
 </template>
     
 <script>
-import HeaderAdmin from '@/components/HeaderAdmin.vue';
+import PageHeader from '@/components/PageHeader.vue';
 
 export default {
     name: "IndicatorsPage",
@@ -44,7 +44,7 @@ export default {
         }
     },
     components: {
-        HeaderAdmin
+        PageHeader
     }
 };
 </script>

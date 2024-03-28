@@ -15,7 +15,8 @@ const routes = [
     { path: "/edit-profile", component: ProfilePage, name: "edit-profile" },
 
     { path: "/users", component: PageUsers, name: "users" },
-    { path: "/edit-user", component: EditUserPage, name: "edit-user" },
+    { path: "/user", component: EditUserPage, name: "create-user" },
+    { path: "/user/:id", component: EditUserPage, name: "edit-user" },
 
     { path: "/opops", component: OpopsPage, name: "opops" },
     { path: "/indicators", component: IndicatorsPage, name: "indicators" },

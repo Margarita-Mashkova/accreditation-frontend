@@ -1,5 +1,5 @@
 <template>
-    <HeaderAdmin />
+    <PageHeader />
     <div class="heading">
         <label>Список аккредитационных показателей</label>
     </div>
@@ -40,12 +40,12 @@
 </template>
     
 <script>
-import HeaderAdmin from '@/components/HeaderAdmin.vue';
+import PageHeader from '@/components/PageHeader.vue';
 
 export default {
     name: "IndicatorsPage",
     components: {
-        HeaderAdmin
+        PageHeader
     },
     methods:{
         showVariables(){

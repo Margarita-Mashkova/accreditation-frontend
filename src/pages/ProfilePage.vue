@@ -1,5 +1,5 @@
 <template>
-    <HeaderAdmin />
+    <PageHeader />
     <div class="form-data">
         <FormProfile />
     </div>
@@ -7,12 +7,12 @@
   
 <script>
 import FormProfile from "@/components/FormProfile.vue";
-import HeaderAdmin from "@/components/HeaderAdmin.vue";
+import PageHeader from "@/components/PageHeader.vue";
 
 export default {
     name: "ProfilePage",
     components: {
-        HeaderAdmin,
+        PageHeader,
         FormProfile
     },
 };

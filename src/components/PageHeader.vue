@@ -1,27 +1,33 @@
 <template>
     <div class="navbar">
         <ul class="navbar-list">
-            <li>
-                <router-link :to="'/users'">Руководители ОПОП</router-link>
+
+            <li v-if="this.user.role == 'ADMIN'">
+                <router-link :to="'/users'">Пользователи</router-link>
             </li>
-            <li>
+            <li v-if="this.user.role == 'ADMIN'">
+                <a href='http://localhost:9000/swagger-ui/index.html#/' target="_blank">Swagger</a>
+            </li>
+
+            <li v-if="this.user.role == 'DEAN'">
                 <router-link :to="'/opops'">ОПОП</router-link>
             </li>
-            <li>
+            <li v-if="this.user.role == 'DEAN'">
                 <router-link :to="'/indicators'">Показатели</router-link>
             </li>
-            <li>
+            <li v-if="this.user.role == 'DEAN' || this.user.role == 'MANAGER'">
                 <router-link :to="'/input-data'">Ввод данных</router-link>
             </li>
-            <li>
+            <li v-if="this.user.role == 'DEAN' || this.user.role == 'MANAGER'">
                 <router-link :to="'/calculation'">Расчет показателей</router-link>
             </li>
+
             <div class="navbar-item-last">
                 <li>
                     <router-link :to="'/edit-profile'">Личные данные</router-link>
                 </li>
                 <li>
-                    <router-link :to="'/auth'">Выход</router-link>
+                    <router-link :to="'/auth'" @click="logout()">Выход</router-link>
                 </li>
             </div>
         </ul>
@@ -29,11 +35,33 @@
 </template>
 
 <script>
+import ProfileService from '@/services/ProfileService'
 
 export default {
     data() {
-        return {};
+        return {
+            user: {}
+        }
     },
+    methods: {
+        logout() {
+            localStorage.setItem('jwt', null)
+            console.log(localStorage.getItem('jwt'))
+        },
+        me() {
+            ProfileService.me().then(response => {
+                if (response.status == 200) {
+                    this.user = response.data
+                }
+            }).catch((ex) => {
+                alert(ex.response.data)
+                console.log(ex.response.data)
+            })
+        }
+    },
+    mounted() {
+        this.me()
+    }
 }
 </script>
 
