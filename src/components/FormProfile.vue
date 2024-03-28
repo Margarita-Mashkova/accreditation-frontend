@@ -36,6 +36,7 @@ export default {
                 if (response.status == 200) {
                     this.user = response.data
                     this.user.password = null
+                    console.log("токен " + localStorage.getItem('jwt'));
                 }
             }).catch((ex) => {
                 alert(ex.response.data)

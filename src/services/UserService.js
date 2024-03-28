@@ -14,6 +14,11 @@ class UserService {
         return axios.get(URL)
     }
 
+    findUserByLogin(login){
+        let URL = USER_API_BASE_URL + '/find?login=' + login
+        return axios.get(URL)
+    }
+
     findAllRoles(){
         let URL = USER_API_BASE_URL + '/roles'
         return axios.get(URL)

@@ -18,6 +18,26 @@
             <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
         </select>
 
+        <div v-if="this.$route.params.id != null" class="opops-list">
+            <label>Список ОПОП:</label>
+            <!-- <label v-for="opop in user.opops" :key="opop"> {{ opop.name }}</label> -->
+            <!-- <label>{{ this.opops }}</label> -->
+            <table>
+                <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>Наименование</td>
+                    </tr>
+                </thead>
+                <tbody v-for="opop in user.opops" v-bind:key="opop">
+                    <tr>
+                        <td>{{ opop.id }}</td>
+                        <td>{{ opop.name }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
         <div class="btn-bar">
             <button class="btn-simple" @click="save()">Сохранить</button>
         </div>
@@ -32,7 +52,8 @@ export default {
         return {
             roles: [],
             user: {},
-            roleNames: ['Администратор', 'Представитель учебного управления', 'Руководитель ОПОП']
+            roleNames: ['Администратор', 'Представитель учебного управления', 'Руководитель ОПОП'],
+            //opops: ''
         }
     },
     methods: {
@@ -44,10 +65,13 @@ export default {
                 }
             })
         },
-        findUser(){
-            UserService.findUser(this.$route.params.id).then(response =>{
-                if(response.status == 200){
+        findUser() {
+            UserService.findUser(this.$route.params.id).then(response => {
+                if (response.status == 200) {
                     this.user = response.data
+                    /* this.user.opops.forEach((opop) => {
+                        this.opops += opop.name + ', '
+                    }) */
                 }
             }).catch((ex) => {
                 alert(ex.response.data)
@@ -65,7 +89,7 @@ export default {
                 console.log(ex.response.data)
             })
         },
-        updateUser(){
+        updateUser() {
             this.user.password = null
             UserService.editUser(this.$route.params.id, this.user).then(response => {
                 if (response.status == 200) {
@@ -77,12 +101,12 @@ export default {
             })
         },
         save() {
-            if(this.$route.params.id != null){
+            if (this.$route.params.id != null) {
                 this.updateUser()
             }
-            else{
+            else {
                 this.addUser()
-            }            
+            }
         }
     },
     mounted() {
@@ -121,12 +145,33 @@ form {
     flex-direction: column;
 }
 
+.opops-list{
+    display: flex;
+    flex-direction: column;
+}
+
 h4 {
-    margin-top: 10px;
-    margin-bottom: 15px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .btn-simple {
     margin-top: 20px;
+}
+
+thead {
+    font-weight: bold;
+    color: black;
+}
+
+table,
+td {
+    color: black;
+}
+
+td {
+    padding: 5px 10px;
+    font-size: 11pt;
+    border-bottom: 1px solid #3D3C84;
 }
 </style>

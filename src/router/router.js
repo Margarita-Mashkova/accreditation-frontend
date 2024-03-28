@@ -4,6 +4,7 @@ import PageLogin from "@/pages/LoginPage";
 import PageUsers from "@/pages/UsersPage";
 import ProfilePage from "@/pages/ProfilePage";
 import EditUserPage from "@/pages/EditUserPage";
+import EditOpopPage from "@/pages/EditOpopPage";
 import OpopsPage from "@/pages/OpopsPage";
 import IndicatorsPage from "@/pages/IndicatorsPage";
 import VariablesPage from "@/pages/VariablesPage";
@@ -19,7 +20,11 @@ const routes = [
     { path: "/user/:id", component: EditUserPage, name: "edit-user" },
 
     { path: "/opops", component: OpopsPage, name: "opops" },
+    { path: "/opop", component: EditOpopPage, name: "create-opop" },
+    { path: "/opop/:id", component: EditOpopPage, name: "edit-opop" },
+
     { path: "/indicators", component: IndicatorsPage, name: "indicators" },
+
     { path: "/variables", component: VariablesPage, name: "variables" },
 
     { path: "/input-data", component: InputDataPage, name: "input-data" },

@@ -4,7 +4,7 @@
         <label>Список переменных</label>
     </div>
     <div class="btn">
-        <button class="btn-simple">Создать</button>
+        <button class="btn-simple" @click="openCreateVariableFrom()">Создать</button>
     </div>
 
     <div class="users">
@@ -51,6 +51,16 @@ export default {
     name: "IndicatorsPage",
     components: {
         PageHeader
+    },
+    data(){
+        return{
+            variables: []
+        }
+    },
+    methods:{
+        openCreateVariableFrom() {
+            this.$router.push("/variable")
+        },
     }
 };
 </script>
