@@ -21,8 +21,8 @@
                     <td>Действия</td>
                 </tr>
             </thead>
-            <tbody v-for="user in users" v-bind:key="user">
-                <tr>
+            <tbody>
+                <tr v-for="user in users" v-bind:key="user">
                     <td>{{ user.id }}</td>
                     <td>{{ user.surname }}</td>
                     <td>{{ user.name }}</td>

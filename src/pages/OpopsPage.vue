@@ -17,8 +17,8 @@
                     <td>Действия</td>
                 </tr>
             </thead>
-            <tbody v-for="opop in opops" :key="opop">
-                <tr>
+            <tbody>
+                <tr v-for="opop in opops" :key="opop">
                     <td>{{ opop.id }}</td>
                     <td>{{ opop.name }}</td>
                     <td>{{ opop.userLogin }}</td>                    
@@ -103,7 +103,7 @@ thead {
 
 table,
 td {
-    color: black;
+    color: black;    
 }
 
 td {

@@ -7,7 +7,7 @@
         <button class="btn-simple" @click="openCreateVariableFrom()">Создать</button>
     </div>
 
-    <div class="users">
+    <div class="variables">
         <table>
             <thead>
                 <tr>
@@ -17,25 +17,13 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>ЕГЭб</td>
-                    <td>Cуммарное значение баллов ЕГЭ обучающихся, зачисленных за счет средств <br>
-                         соответствующих бюджетов бюджетной системы Российской Федерации</td>                   
+                <tr v-for="variable in variables" :key="variable">
+                    <td>{{ variable.key }}</td>
+                    <td>{{ variable.name }}</td>                   
                     <td>
                         <div class="btn-bar">
-                            <button class="btn-simple-edit">Изменить</button>
-                            <button class="btn-simple-delete">Удалить</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>n</td>
-                    <td>Численность обучающихся, зачисленных наобучение за счет средств<br>
-                         соответствующих бюджетов бюджетной системы Российской Федерации</td>                   
-                    <td>
-                        <div class="btn-bar">
-                            <button class="btn-simple-edit">Изменить</button>
-                            <button class="btn-simple-delete">Удалить</button>
+                            <button class="btn-simple-edit" @click="editVariable(variable.key)">Изменить</button>
+                            <button class="btn-simple-delete" @click="deleteVariable(variable.key)">Удалить</button>
                         </div>
                     </td>
                 </tr>
@@ -45,10 +33,11 @@
 </template>
     
 <script>
-import PageHeader from '@/components/PageHeader.vue';
+import PageHeader from '@/components/PageHeader.vue'
+import VariableService from '@/services/VariableService'
 
 export default {
-    name: "IndicatorsPage",
+    name: "VariablesPage",
     components: {
         PageHeader
     },
@@ -58,9 +47,35 @@ export default {
         }
     },
     methods:{
+        findAllVariables(){
+            VariableService.findAllVariables().then(response => {
+                if (response.status == 200) {
+                    this.variables = response.data
+                }
+            })
+        },
         openCreateVariableFrom() {
             this.$router.push("/variable")
         },
+        editVariable(key){
+            this.$router.push("/variable/" + key)
+        },
+        deleteVariable(key){
+            var sure = confirm("Вы уверены, что хотите удалить переменную?")
+            if (sure) {
+                VariableService.deleteVariable(key).then(response => {
+                    if (response.status == 200) {
+                        this.findAllVariables()
+                    }
+                }).catch((ex) => {
+                    alert(ex.response.data)
+                    console.log(ex.response.data)
+                })
+            }
+        }
+    },
+    mounted(){
+        this.findAllVariables()
     }
 };
 </script>
@@ -87,6 +102,7 @@ thead {
 table,
 td {
     color: black;
+    margin: 0px 150px;
 }
 
 td {
@@ -94,7 +110,7 @@ td {
     border-bottom: 1px solid #3D3C84;
 }
 
-.users {
+.variables {
     display: flex;
     justify-content: center;
 }

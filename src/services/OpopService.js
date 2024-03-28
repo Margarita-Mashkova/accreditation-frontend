@@ -31,6 +31,11 @@ class OpopService {
         let URL = OPOP_API_BASE_URL + '/' + id
         return axios.delete(URL)
     }
+
+    deleteAllOpops(){
+        let URL = OPOP_API_BASE_URL
+        return axios.delete(URL)
+    }
 }
 
 export default new OpopService()
