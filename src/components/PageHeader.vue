@@ -21,6 +21,9 @@
             <li v-if="this.user.role == 'DEAN' || this.user.role == 'MANAGER'">
                 <router-link :to="'/calculation'">Расчет показателей</router-link>
             </li>
+            <li v-if="this.user.role == 'DEAN' || this.user.role == 'MANAGER'">
+                <router-link :to="'/analysis'">Анализ показателей</router-link>
+            </li>
 
             <div class="navbar-item-last">
                 <li>

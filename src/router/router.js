@@ -11,9 +11,10 @@ import OpopsPage from "@/pages/OpopsPage";
 import IndicatorsPage from "@/pages/IndicatorsPage";
 import VariablesPage from "@/pages/VariablesPage";
 import InputDataPage from "@/pages/InputDataPage";
-import CalculationPage from "@/pages/CalculationPage"
+import CalculationPage from "@/pages/CalculationPage";
+import AnalysisPage from "@/pages/AnalysisPage";
 
-const routes = [    
+const routes = [
     { path: "/auth", component: PageLogin, name: "login", alias: "/" },
     { path: "/edit-profile", component: ProfilePage, name: "edit-profile" },
 
@@ -26,16 +27,28 @@ const routes = [
     { path: "/opop/:id", component: EditOpopPage, name: "edit-opop" },
 
     { path: "/indicators", component: IndicatorsPage, name: "indicators" },
-    { path: "/indicator", component: EditIndicatorPage, name: "create-indicator" },
-    { path: "/indicator/:key", component: EditIndicatorPage, name: "edit-indicator" },
+    {
+        path: "/indicator",
+        component: EditIndicatorPage,
+        name: "create-indicator",
+    },
+    {
+        path: "/indicator/:key",
+        component: EditIndicatorPage,
+        name: "edit-indicator",
+    },
 
     { path: "/variables", component: VariablesPage, name: "variables" },
     { path: "/variable", component: EditVariablePage, name: "create-variable" },
-    { path: "/variable/:key", component: EditVariablePage, name: "edit-variable" },
+    {
+        path: "/variable/:key",
+        component: EditVariablePage,
+        name: "edit-variable",
+    },
 
     { path: "/input-data", component: InputDataPage, name: "input-data" },
     { path: "/calculation", component: CalculationPage, name: "calculation" },
-
+    { path: "/analysis", component: AnalysisPage, name: "analysis" },
 ];
 
 let router = new VueRouter.createRouter({
