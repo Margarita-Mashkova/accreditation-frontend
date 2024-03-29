@@ -6,9 +6,8 @@
     <div class="filter">
         <div class="filter-item">
             <label>ОПОП</label>
-            <select class="input-simple">
-                <option>Программная инженерия</option>
-                <option>Прикладная информатика</option>
+            <select class="input-simple" v-model="opopId">
+                <option v-for="opop in opops" :key="opop" :value="opop.id">{{ opop.name }}</option>
             </select>
         </div>
         <div class="filter-item">
@@ -19,10 +18,10 @@
 
     <div class="btn-bar">
         <div class="btn">
-            <button class="btn-simple">Сформировать</button>
+            <button class="btn-simple" @click="findCalculationsByOpopAndDate()">Сформировать</button>
         </div>
         <div class="btn">
-            <button class="btn-simple">Сохранить</button>
+            <button class="btn-simple" @click="saveReport()">Сохранить</button>
         </div>
     </div>    
 
@@ -61,17 +60,40 @@
 </template>
     
 <script>
-import PageHeader from '@/components/PageHeader.vue';
+import PageHeader from '@/components/PageHeader.vue'
+import OpopService from '@/services/OpopService'
 
 export default {
-    name: "IndicatorsPage",
-    data() {
-        return {
-            variablesCount: 14
-        }
-    },
+    name: "IndicatorsPage",    
     components: {
         PageHeader
+    },
+    data() {
+        return {
+            opops: [],
+            date: '',
+            opopId: '',
+        }
+    },
+    methods:{
+        findAllOpops() {
+            OpopService.findAllOpops().then(response => {
+                if (response.status == 200) {
+                    this.opops = response.data
+                    this.opopId = this.opops[0].id
+                    this.date = new Date().toJSON().split("T")[0]
+                }
+            })
+        },
+        findCalculationsByOpopAndDate(){
+            
+        },
+        saveReport(){
+            console.log("Report was saved")
+        }
+    },
+    mounted(){
+        this.findAllOpops()
     }
 };
 </script>
