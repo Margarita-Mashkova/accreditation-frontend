@@ -103,6 +103,7 @@ table,
 td {
     color: black;
     margin: 0px 150px;
+    min-width: 80%;
 }
 
 td {

@@ -5,6 +5,7 @@ import PageUsers from "@/pages/UsersPage";
 import ProfilePage from "@/pages/ProfilePage";
 import EditUserPage from "@/pages/EditUserPage";
 import EditOpopPage from "@/pages/EditOpopPage";
+import EditIndicatorPage from "@/pages/EditIndicatorPage";
 import EditVariablePage from "@/pages/EditVariablePage";
 import OpopsPage from "@/pages/OpopsPage";
 import IndicatorsPage from "@/pages/IndicatorsPage";
@@ -25,6 +26,8 @@ const routes = [
     { path: "/opop/:id", component: EditOpopPage, name: "edit-opop" },
 
     { path: "/indicators", component: IndicatorsPage, name: "indicators" },
+    { path: "/indicator", component: EditIndicatorPage, name: "create-indicator" },
+    { path: "/indicator/:key", component: EditIndicatorPage, name: "edit-indicator" },
 
     { path: "/variables", component: VariablesPage, name: "variables" },
     { path: "/variable", component: EditVariablePage, name: "create-variable" },

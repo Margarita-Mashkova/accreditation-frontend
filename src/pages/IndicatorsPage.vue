@@ -1,17 +1,17 @@
 <template>
     <PageHeader />
     <div class="heading">
-        <label>Список аккредитационных показателей</label>
+        <label>Аккредитационные показатели</label>
     </div>
     <div class="btn">
-        <button class="btn-simple">Создать</button>
+        <button class="btn-simple" @click="openCreateIndicatorFrom()">Создать</button>
     </div>
 
     <div class="btn-left">
         <button class="btn-simple" @click="showVariables()">Переменные</button>
     </div>
 
-    <div class="users">
+    <div class="indicators">
         <table>
             <thead>
                 <tr>
@@ -22,15 +22,14 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>АП1</td>
-                    <td>Средний балл ЕГЭ обучающихся, принятых по его результатам <br>
-                        на обучение по программам бакалавриата и специалитета</td>
-                    <td>ЕГЭб * n</td>                    
+                <tr v-for="indicator in indicators" :key="indicator">
+                    <td>{{ indicator.key }}</td>
+                    <td>{{ indicator.name }}</td>
+                    <td>{{ indicator.formula }}</td>                    
                     <td>
                         <div class="btn-bar">
-                            <button class="btn-simple-edit">Изменить</button>
-                            <button class="btn-simple-delete">Удалить</button>
+                            <button class="btn-simple-edit" @click="editIndicator(indicator.key)">Изменить</button>
+                            <button class="btn-simple-delete" @click="deleteIndicator(indicator.key)">Удалить</button>
                         </div>
                     </td>
                 </tr>
@@ -40,17 +39,52 @@
 </template>
     
 <script>
-import PageHeader from '@/components/PageHeader.vue';
+import PageHeader from '@/components/PageHeader.vue'
+import IndicatorService from '@/services/IndicatorService'
 
 export default {
     name: "IndicatorsPage",
     components: {
         PageHeader
     },
+    data(){
+        return{
+            indicators: []
+        }
+    },
     methods:{
         showVariables(){
             this.$router.push("/variables")
+        },
+        findAllIndicators(){
+            IndicatorService.findAllIndicators().then(response => {
+                if (response.status == 200) {
+                    this.indicators = response.data
+                }
+            })
+        },        
+        openCreateIndicatorFrom() {
+            this.$router.push("/indicator")
+        },
+        editIndicator(key){
+            this.$router.push("/indicator/" + key)
+        },
+        deleteIndicator(key){
+            var sure = confirm("Вы уверены, что хотите удалить показатель?")
+            if (sure) {
+                IndicatorService.deleteIndicator(key).then(response => {
+                    if (response.status == 200) {
+                        this.findAllIndicators()
+                    }
+                }).catch((ex) => {
+                    alert(ex.response.data)
+                    console.log(ex.response.data)
+                })
+            }
         }
+    },
+    mounted(){
+        this.findAllIndicators()
     }
 };
 </script>
@@ -81,6 +115,8 @@ thead {
 table,
 td {
     color: black;
+    min-width: 80%;
+    margin: 0px 140px;
 }
 
 td {
@@ -92,7 +128,7 @@ td {
     border: 1px solid #3D3C84;
 }*/
 
-.users {
+.indicators {
     display: flex;
     justify-content: center;
 }
