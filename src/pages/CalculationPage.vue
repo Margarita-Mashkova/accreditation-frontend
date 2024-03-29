@@ -12,7 +12,7 @@
         </div>
         <div class="filter-item">
             <label>Дата</label>
-            <input class="input-simple" type="date">
+            <input class="input-simple" type="date" v-model="date">
         </div>
     </div>
 
@@ -35,24 +35,18 @@
                     <td>Баллы</td>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>Средний балл ЕГЭ</td>
-                    <td>АП1</td>
-                    <td>70</td>
-                    <td>10</td>
-                </tr>
-                <tr>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
-                    <td>...</td>
+            <tbody v-if="calculations.length != 0">
+                <tr v-for=" calculation in calculations" :key="calculation">
+                    <td>{{ calculation.indicatorName }}</td>
+                    <td>{{ calculation.id.indicatorKey }}</td>
+                    <td>{{ calculation.value }}</td>
+                    <td>{{ calculation.score }}</td>
                 </tr>
                 <tr>
                     <td><b>Итого</b></td>
                     <td></td>
                     <td></td>
-                    <td><b>120 баллов</b></td>
+                    <td class="summary-td"><b>{{ this.sum }} баллов</b></td>
                 </tr>
             </tbody>
         </table>
@@ -62,9 +56,10 @@
 <script>
 import PageHeader from '@/components/PageHeader.vue'
 import OpopService from '@/services/OpopService'
+import CalculationService from '@/services/CalculationService'
 
 export default {
-    name: "IndicatorsPage",    
+    name: "CalculationPage",    
     components: {
         PageHeader
     },
@@ -73,6 +68,8 @@ export default {
             opops: [],
             date: '',
             opopId: '',
+            calculations: '',
+            sum:''
         }
     },
     methods:{
@@ -86,7 +83,21 @@ export default {
             })
         },
         findCalculationsByOpopAndDate(){
-            
+            this.sum = 0
+            CalculationService.findCalculationsByOpopAndDate(this.opopId, this.date).then(response => {
+                if (response.status == 200) {
+                    this.calculations = response.data
+                    this.calculateSum()
+                }
+            }).catch((ex) => {
+                //alert(ex.response.data)
+                console.log(ex.response.data)
+            })
+        },
+        calculateSum(){
+            this.calculations.forEach((calculation) =>{
+                this.sum += calculation.score
+            })
         },
         saveReport(){
             console.log("Report was saved")
@@ -157,11 +168,16 @@ thead {
 table,
 td {
     color: black;
+    margin: 0px 150px;
 }
 
 td {
-    padding: 10px 50px;
+    padding: 10px 60px;
     border-bottom: 1px solid #3D3C84;
+}
+
+.summary-td{
+    min-width: 90px;
 }
 
 .result {
