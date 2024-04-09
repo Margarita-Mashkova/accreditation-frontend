@@ -20,6 +20,6 @@ export default {
   
 <style scoped>
 .form-data {
-    margin: 20px 480px;
+    margin: 20px 200px;
 }
 </style>

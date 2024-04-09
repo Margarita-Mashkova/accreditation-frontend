@@ -2,40 +2,79 @@
     <form @submit.prevent>
         <h4>Показатель</h4>
 
-        <div v-if="this.$route.params.key != null" class="input-key">
-            <!--  <label>Обозначение: <b>{{ variable.key }}</b></label> -->
-            <label>Обозначение</label>
-            <input v-model="indicator.key" class="input-simple" type="text" placeholder="Обозначение" disabled>
-        </div>
-        <div v-else class="input-key">
-            <label>Обозначение</label>
-            <input v-model="indicator.key" class="input-simple" type="text" placeholder="Обозначение">
-        </div>
+        <div class="form-container">
+            <div class="first-part">
+                <div v-if="this.$route.params.key != null" class="input-key">
+                    <!--  <label>Обозначение: <b>{{ variable.key }}</b></label> -->
+                    <label>Обозначение</label>
+                    <input v-model="indicator.key" class="input-simple" type="text" placeholder="Обозначение" disabled>
+                </div>
+                <div v-else class="input-key">
+                    <label>Обозначение</label>
+                    <input v-model="indicator.key" class="input-simple" type="text" placeholder="Обозначение">
+                </div>
 
-        <label>Наименование</label>
-        <textarea v-model="indicator.name" class="input-simple" type="text" placeholder="Наименование"></textarea>
+                <div class="input-key">
+                    <label>Наименование</label>
+                    <textarea v-model="indicator.name" class="input-simple" type="text"
+                        placeholder="Наименование"></textarea>
+                </div>
 
-        <label>Формула</label>
-        <input v-model="indicator.formula" class="input-simple" type="text" placeholder="Формула">
+                <div class="input-key">
+                    <label>Формула</label>
+                    <input v-model="indicator.formula" class="input-simple" type="text" placeholder="Формула">
+                </div>
 
-        <div class="calculator-part">
-            <button v-for="variable in variables" :key="variable" :value="variable.key"
-                @click="clickVariable(variable.key)">
-                {{ variable.key }}</button>
-        </div>
-        <div class="calculator-part">
-            <button v-for="operator in operators" :key="operator" :value="operator" @click="clickVariable(operator)">
-                {{ operator }}</button>
-        </div>
+                <div class="calculator-part">
+                    <button v-for="variable in variables" :key="variable" :value="variable.key"
+                        @click="clickVariable(variable.key)">
+                        {{ variable.key }}</button>
+                </div>
+                <div class="calculator-part">
+                    <button v-for="operator in operators" :key="operator" :value="operator"
+                        @click="clickVariable(operator)">
+                        {{ operator }}</button>
+                </div>
 
-        <div class="calculator-part">
-            <button v-for="number in numbers" :key="number" :value="number" @click="clickVariable(number)">
-                {{ number }}</button>
-        </div>
-        <div class="calculator-part">
-            <button @click="backspace()"><img src="../assets/backspace.png" width="18" height="18"/></button>
-        </div>
+                <div class="calculator-part">
+                    <button v-for="number in numbers" :key="number" :value="number" @click="clickVariable(number)">
+                        {{ number }}</button>
+                </div>
+                <div class="calculator-part">
+                    <button @click="backspace()"><img src="../assets/backspace.png" width="18" height="18" /></button>
+                </div>
+            </div>
 
+            <div class="second-part">
+                <div class="add-rule">
+                    <label>Правила выставления баллов</label>
+                    <button class="btn-simple-edit" @click="addRule()">Добавить правило</button>
+                </div>
+                <div class="rules" v-for="(rule, index) in listRules" :key="rule">
+                    <div class="item-rule">
+
+                        <div class="rule-bound">
+                            <!-- <label>От</label> -->
+                            <input v-model="this.listRules[index].from" class="input-simple" type="number"
+                                placeholder="от">
+                        </div>
+                        <div class="rule-bound">
+                            <!-- <label>До</label> -->
+                            <input v-model="this.listRules[index].to" class="input-simple" type="number"
+                                placeholder="до">
+                        </div>
+                        <div class="rule-bound">
+                            <!-- <label>Балл</label> -->
+                            <input v-model="this.listRules[index].value" class="input-simple" type="number"
+                                placeholder="балл">
+                        </div>
+
+                        <button class="btn-simple-delete" @click="deleteRule(index)">Удалить</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
         <div class="btn-bar">
             <button class="btn-simple" @click="save()">Сохранить</button>
         </div>
@@ -54,14 +93,16 @@ export default {
             },
             variables: [],
             operators: ['+', '-', '*', '/', '^', '%', '(', ')'],
-            numbers: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',]
+            numbers: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',],
+            listRules: [],
+            rules: 0,
         }
     },
     methods: {
         clickVariable(key) {
             this.indicator.formula += key
         },
-        backspace(){
+        backspace() {
             this.indicator.formula = this.indicator.formula.substring(0, this.indicator.formula.length - 1)
         },
         findIndicator() {
@@ -73,6 +114,16 @@ export default {
                 alert(ex.response.data)
                 console.log(ex.response.data)
             })
+        },
+        addRule() {
+            if (this.rules < 4) {
+                this.rules += 1
+                this.listRules.push({ from: '', to: '', value: '' })
+            }
+        },
+        deleteRule(index) {
+            this.rules -= 1
+            this.listRules.splice(index, 1)
         },
         addIndicator() {
             IndicatorService.createIndicator(this.indicator).then(response => {
@@ -95,12 +146,13 @@ export default {
             })
         },
         save() {
-            if (this.$route.params.key != null) {
+            /* if (this.$route.params.key != null) {
                 this.updateIndicator()
             }
             else {
                 this.addIndicator()
-            }
+            } */
+            console.log(this.listRules)
         },
         findAllVariables() {
             VariableService.findAllVariables().then(response => {
@@ -151,13 +203,28 @@ form {
     flex-direction: column;
 }
 
+.form-container {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 20px 0px;
+}
+
+.first-part {
+    width: 100%;
+    margin-right: 30px;
+}
+
+.second-part {
+    width: 100%;
+}
+
 h4 {
     margin-top: 10px;
     margin-bottom: 15px;
 }
 
-.btn-simple {
-    margin-top: 20px;
+.btn-bar {
+    margin: 0px 350px
 }
 
 textarea {
@@ -167,10 +234,26 @@ textarea {
     resize: none;
 }
 
-.calculator-part button{
+.calculator-part button {
     padding: 3px 8px;
     margin-bottom: 10px;
     margin-right: 5px;
     font-weight: bold;
+}
+
+.item-rule {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.add-rule {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.rule-bound{
+    margin-right: 10px;
 }
 </style>
