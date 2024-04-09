@@ -9,6 +9,16 @@ class OpopService {
         return axios.get(URL)
     }
 
+    findAllOpopsByPage(pageNumber){
+        let URL = OPOP_API_BASE_URL + '/page?pageNumber=' + pageNumber
+        return axios.get(URL)
+    }
+
+    getAmountPages(){
+        let URL = OPOP_API_BASE_URL + '/pages'
+        return axios.get(URL)
+    }
+
     findOpop(id){
         let URL = OPOP_API_BASE_URL + '/' + id
         return axios.get(URL)

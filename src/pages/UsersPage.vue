@@ -40,6 +40,14 @@
             </tbody>
         </table>
     </div>
+    <div class="btn-bar">
+        <div class="btn-page">
+            <button class="btn-simple" @click="previousPage()">&#9668;</button>
+        </div>
+        <div class="btn-page">
+            <button class="btn-simple" @click="nextPage()">&#9658;</button>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -50,16 +58,26 @@ export default {
     name: "PageUsers",
     data() {
         return {
-            users: []
+            users: [],
+            amountPages: 0,
+            pageNumber: 1
         }
     },
     components: {
         PageHeader
     },
     methods: {
-        findAllUsers() {
-            UserService.findAllUsers().then(response => {
+        getAmountPages(){
+            UserService.getAmountPages().then(response => {
                 if (response.status == 200) {
+                    this.amountPages = response.data
+                }
+            })
+        },
+        findAllUsersByPage() {
+            UserService.findAllUsersByPage(this.pageNumber).then(response => {
+                if (response.status == 200) {
+                    this.getAmountPages()
                     this.users = response.data
                 }
             })
@@ -75,17 +93,32 @@ export default {
             if (sure) {
                 UserService.deleteUser(id).then(response => {
                     if (response.status == 200) {
-                        this.findAllUsers()
+                        this.findAllUsersByPage()
                     }
                 }).catch((ex) => {
                     alert(ex.response.data)
                     console.log(ex.response.data)
                 })
             }
+        },
+        nextPage() {
+            if (this.amountPages > this.pageNumber) {
+                this.pageNumber += 1
+            }
+        },
+        previousPage() {
+            if (this.pageNumber > 1) {
+                this.pageNumber -= 1
+            }
         }
     },
     mounted() {
-        this.findAllUsers()
+        this.findAllUsersByPage()
+    },
+    watch: {
+        'pageNumber'() {
+            this.findAllUsersByPage()
+        }
     }
 };
 </script>
@@ -130,5 +163,10 @@ td {
 
 .btn-bar {
     display: flex;
+    justify-content: center;
+}
+
+.btn-page {
+    margin: 40px 30px;
 }
 </style>

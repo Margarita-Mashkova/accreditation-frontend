@@ -30,6 +30,14 @@
             </tbody>
         </table>
     </div>
+    <div class="btn-bar">
+        <div class="btn-page">
+            <button class="btn-simple" @click="previousPage()">&#9668;</button>
+        </div>
+        <div class="btn-page">
+            <button class="btn-simple" @click="nextPage()">&#9658;</button>
+        </div>
+    </div>
 </template>
     
 <script>
@@ -43,13 +51,23 @@ export default {
     },
     data(){
         return{
-            variables: []
+            variables: [],
+            amountPages: 0,
+            pageNumber: 1
         }
     },
     methods:{
-        findAllVariables(){
-            VariableService.findAllVariables().then(response => {
+        getAmountPages(){
+            VariableService.getAmountPages().then(response => {
                 if (response.status == 200) {
+                    this.amountPages = response.data
+                }
+            })
+        },
+        findAllVariablesByPage(){
+            VariableService.findAllVariablesByPage(this.pageNumber).then(response => {
+                if (response.status == 200) {
+                    this.getAmountPages()
                     this.variables = response.data
                 }
             })
@@ -65,17 +83,32 @@ export default {
             if (sure) {
                 VariableService.deleteVariable(key).then(response => {
                     if (response.status == 200) {
-                        this.findAllVariables()
+                        this.findAllVariablesByPage()
                     }
                 }).catch((ex) => {
                     alert(ex.response.data)
                     console.log(ex.response.data)
                 })
             }
+        },
+        nextPage() {
+            if (this.amountPages > this.pageNumber) {
+                this.pageNumber += 1
+            }
+        },
+        previousPage() {
+            if (this.pageNumber > 1) {
+                this.pageNumber -= 1
+            }
         }
     },
     mounted(){
-        this.findAllVariables()
+        this.findAllVariablesByPage()
+    },
+    watch: {
+        'pageNumber'() {
+            this.findAllVariablesByPage()
+        }
     }
 };
 </script>
@@ -91,6 +124,10 @@ export default {
 
 .btn {
     margin: 30px 680px;
+}
+
+.btn-page {
+    margin: 40px 30px;
 }
 
 thead {
@@ -118,6 +155,16 @@ td {
 
 .btn-bar{
     display: flex;
+    justify-content: center;
+}
+
+.text{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+    height: 60px;
 }
 </style>
     

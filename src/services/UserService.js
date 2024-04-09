@@ -9,6 +9,16 @@ class UserService {
         return axios.get(URL)
     }
 
+    findAllUsersByPage(pageNumber) {
+        let URL = USER_API_BASE_URL + '/page?pageNumber=' + pageNumber
+        return axios.get(URL)
+    }
+
+    getAmountPages(){
+        let URL = USER_API_BASE_URL + '/pages'
+        return axios.get(URL)
+    }
+
     findUser(id) {
         let URL = USER_API_BASE_URL + '/' + id
         return axios.get(URL)

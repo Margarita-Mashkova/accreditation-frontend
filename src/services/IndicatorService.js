@@ -9,6 +9,16 @@ class IndicatorService{
         return axios.get(URL)
     }
 
+    findAllIndicatorsByPage(pageNumber){
+        let URL = INDICATOR_API_BASE_URL + '/page?pageNumber=' + pageNumber
+        return axios.get(URL)
+    }
+    
+    getAmountPages(){
+        let URL = INDICATOR_API_BASE_URL + '/pages'
+        return axios.get(URL)
+    }
+
     findIndicator(key){
         let URL = INDICATOR_API_BASE_URL + '/' + key
         return axios.get(URL)

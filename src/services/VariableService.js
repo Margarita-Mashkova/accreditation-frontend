@@ -9,6 +9,16 @@ class VariableService{
         return axios.get(URL)
     }
 
+    findAllVariablesByPage(pageNumber) {
+        let URL = VARIABLE_API_BASE_URL + '/page?pageNumber=' + pageNumber
+        return axios.get(URL)
+    }
+
+    getAmountPages(){
+        let URL = VARIABLE_API_BASE_URL + '/pages'
+        return axios.get(URL)
+    }
+
     findVariable(key){
         let URL = VARIABLE_API_BASE_URL + '/' + key
         return axios.get(URL)
