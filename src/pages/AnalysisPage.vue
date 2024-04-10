@@ -1,59 +1,61 @@
 <template>
-    <PageHeader />
-    <div class="heading">
-        <h4>Сравнение значений по годам в разрезе ОПОП</h4>
-    </div>
+    <PageHeader />    
+        <div class="heading">
+            <h4>Сравнение значений по годам в разрезе ОПОП</h4>
+        </div>
 
-    <div class="filter">
-        <div class="filter-item">
-            <label>ОПОП</label>
-            <select class="input-simple" v-model="opopId">
-                <option v-for="opop in opops" :key="opop" :value="opop.id">{{ opop.name }}</option>
-            </select>
+        <div class="filter">
+            <div class="filter-item">
+                <label>ОПОП</label>
+                <select class="input-simple" v-model="opopId">
+                    <option v-for="opop in opops" :key="opop" :value="opop.id">{{ opop.name }}</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>Дата начала периода</label>
+                <input class="input-simple" type="date" v-model="dateStart">
+            </div>
+            <div class="filter-item">
+                <label>Дата окончания периода</label>
+                <input class="input-simple" type="date" v-model="dateEnd">
+            </div>
         </div>
-        <div class="filter-item">
-            <label>Дата начала периода</label>
-            <input class="input-simple" type="date" v-model="dateStart">
-        </div>
-        <div class="filter-item">
-            <label>Дата окончания периода</label>
-            <input class="input-simple" type="date" v-model="dateEnd">
-        </div>
-    </div>
 
-    <div class="btn-bar">
-        <div class="btn">
-            <button class="btn-simple" @click="findCalculationsByPeriod()">Сформировать</button>
+        <div class="btn-bar">
+            <div class="btn">
+                <button class="btn-simple" @click="findCalculationsByPeriod()">Сформировать</button>
+            </div>
+            <div class="btn">
+                <button class="btn-simple" @click="saveReport()">Сохранить</button>
+            </div>
         </div>
-        <div class="btn">
-            <button class="btn-simple" @click="saveReport()">Сохранить</button>
-        </div>
-    </div>
 
-    <div class="result">
-        <table>
-            <thead>
-                <tr>
-                    <td>Наименование показателя</td>
-                    <td>Обозначение показателя</td>
-                    <td>Дата мониторинга</td>
-                    <td>Значение</td>
-                    <td>Баллы</td>
-                    <td>Планирование</td>
-                </tr>
-            </thead>
-            <tbody v-if="calculations.length != 0">
-                <tr v-for=" calculation in calculations" :key="calculation">
-                    <td>{{ calculation.indicatorName }}</td>
-                    <td>{{ calculation.id.indicatorKey }}</td>
-                    <td>{{ calculation.id.date }}</td>
-                    <td>{{ calculation.value }}</td>
-                    <td>{{ calculation.score }}</td>
-                    <td>{{ calculation.planned }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+        <div class="result">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Наименование показателя</td>
+                        <td>Обозначение показателя</td>
+                        <td>Дата мониторинга</td>
+                        <td>Значение</td>
+                        <td>Баллы</td>
+                        <td>Планирование</td>
+                    </tr>
+                </thead>
+                <tbody v-if="calculations.length != 0">
+                    <tr v-for=" calculation in calculations" :key="calculation">
+                        <td>
+                            <div class="text">{{ calculation.indicatorName }}</div>
+                        </td>
+                        <td>{{ calculation.id.indicatorKey }}</td>
+                        <td>{{ calculation.id.date }}</td>
+                        <td>{{ calculation.value }}</td>
+                        <td>{{ calculation.score }}</td>
+                        <td>{{ calculation.planned }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 </template>
 
 <script>
@@ -94,7 +96,7 @@ export default {
                     //alert(ex.response.data)
                     console.log(ex.response.data)
                 })
-            }else{
+            } else {
                 alert("Дата начала периода должна быть меньше даты окончания периода")
             }
         },
@@ -178,11 +180,11 @@ thead {
 table,
 td {
     color: black;
-    margin: 0px 150px 50px 150px;
+    margin: 0px 200px 50px 200px;
 }
 
 td {
-    padding: 10px 60px;
+    padding: 10px 40px;
     border-bottom: 1px solid #3D3C84;
 }
 
@@ -193,7 +195,7 @@ td {
 .result {
     display: flex;
     justify-content: center;
-    margin-top: 30px;
+    margin: 30px 0px;
 }
 
 .btn-bar {
@@ -219,5 +221,14 @@ h4 {
     flex-wrap: wrap;
     margin: 10px 70px;
     justify-content: space-evenly;
+}
+
+.text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    height: 60px;
 }
 </style>

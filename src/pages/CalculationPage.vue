@@ -18,7 +18,7 @@
 
     <div class="btn-bar">
         <div class="btn">
-            <button class="btn-simple" @click="findCalculationsByOpopAndDate()">Сформировать</button>
+            <button class="btn-simple" @click="makeCalculationReport()">Сформировать</button>
         </div>
         <div class="btn">
             <button class="btn-simple" @click="saveReport()">Сохранить</button>
@@ -37,7 +37,7 @@
             </thead>
             <tbody v-if="calculations.length != 0">
                 <tr v-for=" calculation in calculations" :key="calculation">
-                    <td>{{ calculation.indicatorName }}</td>
+                    <td><div class="text">{{ calculation.indicatorName }}</div></td>
                     <td>{{ calculation.id.indicatorKey }}</td>
                     <td>{{ calculation.value }}</td>
                     <td>{{ calculation.score }}</td>
@@ -56,7 +56,7 @@
 <script>
 import PageHeader from '@/components/PageHeader.vue'
 import OpopService from '@/services/OpopService'
-import CalculationService from '@/services/CalculationService'
+import ReportService from '@/services/ReportService'
 
 export default {
     name: "CalculationPage",    
@@ -82,9 +82,9 @@ export default {
                 }
             })
         },
-        findCalculationsByOpopAndDate(){
+        makeCalculationReport(){
             this.sum = 0
-            CalculationService.findCalculationsByOpopAndDate(this.opopId, this.date).then(response => {
+            ReportService.makeCalculationReport(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
                     this.calculations = response.data
                     this.calculateSum()
@@ -168,7 +168,7 @@ thead {
 table,
 td {
     color: black;
-    margin: 0px 150px;
+    margin: 30px 150px;
 }
 
 td {
@@ -183,7 +183,6 @@ td {
 .result {
     display: flex;
     justify-content: center;
-    margin-top: 30px;
 }
 
 .btn-bar {
@@ -209,6 +208,15 @@ h4 {
     flex-wrap: wrap;
     margin: 10px 70px;
     justify-content: space-evenly;
+}
+
+.text{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+    height: 60px;
 }
 </style>
     

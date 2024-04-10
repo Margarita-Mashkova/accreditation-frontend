@@ -55,17 +55,17 @@
 
                         <div class="rule-bound">
                             <!-- <label>От</label> -->
-                            <input v-model="this.listRules[index].from" class="input-simple" type="number"
+                            <input v-model="this.listRules[index].min" class="input-simple" type="number"
                                 placeholder="от">
                         </div>
                         <div class="rule-bound">
                             <!-- <label>До</label> -->
-                            <input v-model="this.listRules[index].to" class="input-simple" type="number"
+                            <input v-model="this.listRules[index].max" class="input-simple" type="number"
                                 placeholder="до">
                         </div>
                         <div class="rule-bound">
                             <!-- <label>Балл</label> -->
-                            <input v-model="this.listRules[index].value" class="input-simple" type="number"
+                            <input v-model="this.listRules[index].score" class="input-simple" type="number"
                                 placeholder="балл">
                         </div>
 
@@ -109,6 +109,7 @@ export default {
             IndicatorService.findIndicator(this.$route.params.key).then(response => {
                 if (response.status == 200) {
                     this.indicator = response.data
+                    this.listRules = response.data.rules
                 }
             }).catch((ex) => {
                 alert(ex.response.data)
@@ -118,7 +119,7 @@ export default {
         addRule() {
             if (this.rules < 4) {
                 this.rules += 1
-                this.listRules.push({ from: '', to: '', value: '' })
+                this.listRules.push({ min: '', max: '', score: '' })
             }
         },
         deleteRule(index) {
@@ -126,6 +127,7 @@ export default {
             this.listRules.splice(index, 1)
         },
         addIndicator() {
+            this.indicator.rules = this.listRules            
             IndicatorService.createIndicator(this.indicator).then(response => {
                 if (response.status == 200) {
                     this.$router.push("/indicators")
@@ -146,13 +148,12 @@ export default {
             })
         },
         save() {
-            /* if (this.$route.params.key != null) {
+            if (this.$route.params.key != null) {
                 this.updateIndicator()
             }
             else {
                 this.addIndicator()
-            } */
-            console.log(this.listRules)
+            }
         },
         findAllVariables() {
             VariableService.findAllVariables().then(response => {
