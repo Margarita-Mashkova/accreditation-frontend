@@ -21,7 +21,7 @@
                 <tr v-for="opop in opops" :key="opop">
                     <td>{{ opop.id }}</td>
                     <td><div class="text">{{ opop.name }}</div></td>
-                    <td>{{ opop.userLogin }}</td>                    
+                    <td>{{ opop.userLogin }}</td>                 
                     <td>
                         <div class="btn-bar">
                             <button class="btn-simple-edit" @click="editOpop(opop.id)">Изменить</button>
@@ -63,7 +63,6 @@ export default {
             OpopService.getAmountPages().then(response => {
                 if (response.status == 200) {
                     this.amountPages = response.data
-                    console.log(response.data + ' amount page')
                 }
             })
         },
@@ -72,7 +71,6 @@ export default {
                 if (response.status == 200) {
                     this.getAmountPages()
                     this.opops = response.data
-                    console.log(this.pageNumber)
                 }
             })
         },
@@ -142,7 +140,7 @@ thead {
 
 table,
 td {
-    color: black;    
+    color: black;
 }
 
 td {

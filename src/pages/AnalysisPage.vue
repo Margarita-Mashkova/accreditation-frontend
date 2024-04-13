@@ -30,8 +30,10 @@
         </div>
     </div>
 
-    <div class="result">
-        <table hidden="true">
+    <div id="click-expand"></div>
+    <div class="wrap-expand-table" v-if="calculations.length != 0">
+        <a href="#close">Свернуть</a><a href="#click-expand">Развернуть</a>
+        <table>
             <thead>
                 <tr>
                     <td>Наименование показателя</td>
@@ -43,7 +45,7 @@
                 </tr>
             </thead>
             <tbody v-if="calculations.length != 0">
-                <tr v-for=" calculation in calculations" :key="calculation">
+                <tr v-for="calculation in calculations" :key="calculation">
                     <td>
                         <div class="text">{{ calculation.indicatorName }}</div>
                     </td>
@@ -55,24 +57,36 @@
                 </tr>
             </tbody>
         </table>
+        <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
+    </div>
+    <!-- График сравнения значений показателей по годам -->
+    <div class="chart-list" v-if="showCharts === true && chartType === 'Line'">
+        <LineChart :data="this.chartIndicatorsByYearsData" :options="this.chartOptions" />
+    </div>
+    <div class="chart-list" v-if="showCharts === true && chartType === 'Bar'">
+        <BarChart :data="this.chartIndicatorsByYearsData" :options="this.chartOptions" />
     </div>
 
+    <!-- График сравнения суммарного кол-ва баллов по годам -->
     <div class="chart-list" v-if="showCharts === true">
-        <LineChart :data="this.chartData" :options="this.chartOptions" />
+        <BarChart :data="this.chartScoresByYearsData" :options="this.chartOptions" />
     </div>
 </template>
 
 <script>
 import PageHeader from '@/components/PageHeader.vue'
 import LineChart from '@/components/LineChart.vue'
+import BarChart from '@/components/BarChart.vue'
 import CalculationService from '@/services/CalculationService'
+import IndicatorService from '@/services/IndicatorService'
 import OpopService from '@/services/OpopService'
 
 export default {
     name: "AnalysisPage",
     components: {
         PageHeader,
-        LineChart
+        LineChart,
+        BarChart
     },
     data() {
         return {
@@ -80,19 +94,26 @@ export default {
             dateStart: '',
             dateEnd: '',
             opopId: '',
+            amountIndicators: '',
+            chartType: '',
             showCharts: false,
 
-            chartData: {
+            chartIndicatorsByYearsData: {
                 labels: [],
                 datasets: []
             },
+            chartScoresByYearsData: {
+                labels: [],
+                datasets: []
+            },
+
             chartOptions: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Сравнение значений показателей по годам',
+                        text: 'Название графика',
                         color: 'black',
                         font: { family: 'Century Gothic', size: 20 },
                         padding: 15
@@ -118,20 +139,34 @@ export default {
                 }
             })
         },
+        findAllIndicators() {
+            IndicatorService.findAllIndicators().then(response => {
+                if (response.status == 200) {
+                    this.amountIndicators = response.data.length
+                    let amountYears = this.calculations.length / this.amountIndicators
+                    if (amountYears > 1) {
+                        this.chartType = 'Line'
+                    }
+                    else {
+                        this.chartType = 'Bar'
+                    }
+                }
+            })
+        },
         findCalculationsByPeriod() {
             if (this.dateStart <= this.dateEnd) {
                 CalculationService.findCalculationsByPeriod(this.opopId, this.dateStart, this.dateEnd).then(response => {
                     if (response.status == 200) {
                         this.calculations = response.data
                         if (this.calculations.length != 0) {
+                            this.findAllIndicators()
                             this.convertPlannedField()
                             this.generateCharts()
                         }
-
                     }
                 }).catch((ex) => {
                     //alert(ex.response.data)
-                    console.log(ex.response.data)
+                    console.log(ex)
                 })
             } else {
                 alert("Дата начала периода должна быть меньше даты окончания периода")
@@ -139,11 +174,18 @@ export default {
 
         },
         generateCharts() {
+            this.generateIndicatorsByYearsChart()
+            this.generateScoresByYearsChart()
+            this.showCharts = true
+        },
+        generateIndicatorsByYearsChart() {
+            this.chartIndicatorsByYearsData = { labels: [], datasets: [] }
+            this.chartOptions.plugins.title.text = 'Сравнение значений показателей по годам'
             let preparedData = this.prepareDataForIndicatorsByYears()
-            this.chartData.labels = preparedData.labels
+            this.chartIndicatorsByYearsData.labels = preparedData.labels
             preparedData.sets.forEach(set => {
-                this.chartData.datasets.push(
-                    {                        
+                this.chartIndicatorsByYearsData.datasets.push(
+                    {
                         label: set.key, //АП1                   
                         data: set.values, //баллы
 
@@ -157,7 +199,6 @@ export default {
                     }
                 )
             })
-            this.showCharts = true
         },
         prepareDataForIndicatorsByYears() {
             //let preparedData = [{labels: [], sets: [{label: '', data: []}]}]
@@ -185,9 +226,89 @@ export default {
             };
             let dataArray = dictionaryToArrayOfObjects(dataDictionary)
             let uniqueDates = [...new Set(dates)]
-            
+
             let preparedData = { labels: uniqueDates, sets: dataArray }
             return preparedData;
+        },
+        generateScoresByYearsChart() {
+            this.chartScoresByYearsData = { labels: [], datasets: [] }
+            this.chartOptions.plugins.title.text = 'Сравнение суммарного количества баллов по годам'
+            let preparedData = this.prepareDataForScoresByYears()
+            this.chartScoresByYearsData.labels = preparedData.labels
+            this.chartScoresByYearsData.datasets.push(
+                {
+                    label: 'Суммарное количество баллов за аккредитацию',
+                    data: preparedData.values, //баллы
+
+                    tension: 0.2, /* степень изгиба линий */
+                    borderWidth: 1, /* толщина линий */
+                    pointHoverBorderColor: 'green', /* цвет границ точки при наведении курсора */
+                    pointHoverBackgroundColor: 'green', /* цвет точки при наведении курсора */
+                    pointHoverRadius: 4, /* радиус точки при наведении */
+                    spanGaps: false, /* если зачение отсутствует, линия прерывается */
+                    indexAxis: 'x', /* для транспонирования графика указать значение 'y' */
+                }
+            )
+        },
+        prepareDataForScoresByYears() {
+            // Сортировка вычисленных значений по дате ASC
+            function sortByDate(a, b) {
+                if (a.id.date < b.id.date) {
+                    return -1;
+                }
+                if (a.id.date > b.id.date) {
+                    return 1;
+                }
+                return 0;
+            }
+            const sortedCalculations = this.calculations.sort(sortByDate);
+            // Делим весь массив вычислений на подмассивы по годам
+            let curDate = sortedCalculations[0].id.date
+            let arrCalculationsByYear = []
+            let arrCalculations = []
+            sortedCalculations.forEach(calc =>{
+                if(calc.id.date == curDate){
+                    arrCalculations.push(calc)
+                }
+                else{
+                    arrCalculationsByYear.push({date: curDate, calculations: arrCalculations})
+                    curDate = calc.id.date
+                    arrCalculations = [calc]
+                }
+            })
+            arrCalculationsByYear.push({date: curDate, calculations: arrCalculations})
+
+            let scores = []
+            let dates = []
+            arrCalculationsByYear.forEach(calcByYear =>{
+                let sum = this.calculateSum(calcByYear.calculations)
+                scores.push(sum)
+                dates.push(calcByYear.date)
+            })
+            
+            let preparedData = { labels: dates, values: scores }
+            console.log(preparedData)
+            return preparedData;
+        },
+        calculateSum(calculations) {            
+            let sum = 0;
+            let ap1 = 0;
+            let ap11 = 0;
+            calculations.forEach((calculation) => {                
+                if (calculation.id.indicatorKey === 'АП1') {
+                    ap1 = calculation.score
+                }
+                else if (calculation.id.indicatorKey === 'АП1.1') {
+                    ap11 = calculation.score
+                }
+                else {
+                    sum += calculation.score
+                }
+            })
+            if (ap11 != 0) {
+                sum += ap1 / ap11
+            }
+            return sum;
         },
         convertPlannedField() {
             this.calculations.forEach((calculation) => {
@@ -206,11 +327,6 @@ export default {
         this.dateStart = new Date().toJSON().split("T")[0]
         this.dateEnd = new Date().toJSON().split("T")[0]
         this.findAllOpops()
-    },
-    watch: {
-        'date'() {
-            this.generateCharts()
-        }
     }
 };
 </script>
@@ -274,7 +390,7 @@ thead {
 table,
 td {
     color: black;
-    margin: 0px 200px 50px 200px;
+    margin: 20px 0px;
 }
 
 td {
@@ -284,12 +400,6 @@ td {
 
 .summary-td {
     min-width: 90px;
-}
-
-.result {
-    display: flex;
-    justify-content: center;
-    margin: 30px 0px;
 }
 
 .btn-bar {
@@ -331,5 +441,31 @@ h4 {
     flex-direction: row;
     justify-content: space-evenly;
     margin: 0px 300px;
+}
+
+.wrap-expand-table {
+    margin: 20px 200px 10px 200px;
+    text-align: -webkit-right;
+}
+
+.wrap-expand-table a[href^="#click-expand"],
+.wrap-expand-table a[href="#close"] {
+    text-decoration: none;
+    border-bottom: 1px dashed;
+    color: black;
+    align-self: last baseline;
+}
+
+/* Если браузер не поддерживает структурные псевдоклассы, то список будет раскрыт и доступ к данным сохранится */
+[id^="click-expand"] {
+    position: fixed;
+    /* чтобы страница "не подпрыгивала" к id */
+}
+
+[id^="click-expand"]:target+.wrap-expand-table a[href^="#click-expand"],
+[id^="click-expand"]:not(:target)+.wrap-expand-table tbody tr:nth-of-type(n+4),
+/* 5 — порядковый номер строки, после которой строки будут скрыты */
+[id^="click-expand"]:not(:target)+.wrap-expand-table a[href="#close"] {
+    display: none;
 }
 </style>

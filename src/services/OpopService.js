@@ -19,20 +19,25 @@ class OpopService {
         return axios.get(URL)
     }
 
+    findAllOpopsLevels(){
+        let URL = OPOP_API_BASE_URL + '/levels'
+        return axios.get(URL)
+    }
+
     findOpop(id){
         let URL = OPOP_API_BASE_URL + '/' + id
         return axios.get(URL)
     }
 
     //PUT
-    editOpop(id, name, userId){
-        let URL = OPOP_API_BASE_URL + "/" + id + "?name=" + name + "&userId=" + userId
+    editOpop(id, name, level, userId){
+        let URL = OPOP_API_BASE_URL + "/" + id + "?name=" + name + "&level=" + level + "&userId=" + userId
         return axios.put(URL)
     }
 
     //POST
-    createOpop(name, userId){
-        let URL = OPOP_API_BASE_URL + "?name=" + name + "&userId=" + userId
+    createOpop(name, level, userId){
+        let URL = OPOP_API_BASE_URL + "?name=" + name + "&level=" + level + "&userId=" + userId
         return axios.post(URL)
     }
 

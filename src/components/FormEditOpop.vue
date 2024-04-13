@@ -10,6 +10,11 @@
             <option v-for="user in users" :key="user" :value="user.id">{{ user.surname }} {{ user.name }} {{ user.patronymic }}</option>
         </select>
 
+        <label>Уровень образования</label>
+        <select class="input-simple" v-model="opop.level">
+            <option v-for="level in opopLevels" :key="level" :value="level">{{ level }}</option>
+        </select>
+
         <div class="btn-bar">
             <button class="btn-simple" @click="save()">Сохранить</button>
         </div>
@@ -27,7 +32,8 @@ export default {
             opop: {},
             opopUser: {
                 id: null
-            }
+            },
+            opopLevels:[]
         }
     },
     methods: {
@@ -37,6 +43,16 @@ export default {
                     this.users = response.data                    
                     if(this.opopUser.id == null){
                         this.opopUser.id = this.users[1].id
+                    }
+                }
+            })
+        },
+        findAllOpopsLevels(){
+            OpopService.findAllOpopsLevels().then(response =>{
+                if(response.status == 200){
+                    this.opopLevels = response.data
+                    if(this.opop.level == null){
+                        this.opop.level = this.opopLevels[0]
                     }
                 }
             })
@@ -55,7 +71,8 @@ export default {
             OpopService.findOpop(this.$route.params.id).then(response =>{
                 if(response.status == 200){
                     this.opop = response.data
-                    this.findUserByLogin(this.opop.userLogin)                    
+                    this.findUserByLogin(this.opop.userLogin)
+                    console.log(this.opop)
                 }
             }).catch((ex) => {
                 alert(ex.response.data)
@@ -63,7 +80,7 @@ export default {
             })
         },
         addOpop() {
-            OpopService.createOpop(this.opop.name, this.opopUser.id).then(response => {
+            OpopService.createOpop(this.opop.name, this.opop.level, this.opopUser.id).then(response => {
                 if (response.status == 200) {
                     this.$router.push("/opops")
                 }
@@ -74,7 +91,7 @@ export default {
         },
         updateOpop(){
             this.opop
-            OpopService.editOpop(this.$route.params.id, this.opop.name, this.opopUser.id).then(response => {
+            OpopService.editOpop(this.$route.params.id, this.opop.name, this.opop.level, this.opopUser.id).then(response => {
                 if (response.status == 200) {
                     this.$router.push("/opops")
                 }
@@ -94,6 +111,7 @@ export default {
     },
     mounted() {
         this.findAllUsers()
+        this.findAllOpopsLevels()
     },
     created() {
         if (this.$route.params.id != null) {

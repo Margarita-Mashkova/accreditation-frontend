@@ -24,6 +24,11 @@ class IndicatorService{
         return axios.get(URL)
     }
 
+    findAllRuleLevels(){
+        let URL = 'http://localhost:9000/rule/levels'
+        return axios.get(URL)
+    }
+
     //POST
     createIndicator(indicator){
         let URL = INDICATOR_API_BASE_URL

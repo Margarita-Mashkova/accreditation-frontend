@@ -54,19 +54,25 @@
                     <div class="item-rule">
 
                         <div class="rule-bound">
-                            <!-- <label>От</label> -->
+                            <label>От</label>
                             <input v-model="this.listRules[index].min" class="input-simple" type="number"
                                 placeholder="от">
                         </div>
                         <div class="rule-bound">
-                            <!-- <label>До</label> -->
+                            <label>До</label>
                             <input v-model="this.listRules[index].max" class="input-simple" type="number"
                                 placeholder="до">
                         </div>
                         <div class="rule-bound">
-                            <!-- <label>Балл</label> -->
+                            <label>Балл</label>
                             <input v-model="this.listRules[index].score" class="input-simple" type="number"
                                 placeholder="балл">
+                        </div>
+                        <div class="rule-bound">
+                            <label>Уровень</label>
+                            <select class="input-simple" v-model="this.listRules[index].level">
+                                <option v-for="level in ruleLevels" :key="level" :value="level">{{ level }}</option>
+                            </select>
                         </div>
 
                         <button class="btn-simple-delete" @click="deleteRule(index)">Удалить</button>
@@ -96,6 +102,7 @@ export default {
             numbers: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',],
             listRules: [],
             rules: 0,
+            ruleLevels: []
         }
     },
     methods: {
@@ -110,6 +117,7 @@ export default {
                 if (response.status == 200) {
                     this.indicator = response.data
                     this.listRules = response.data.rules
+                    this.rules = response.data.rules.length
                 }
             }).catch((ex) => {
                 alert(ex.response.data)
@@ -119,7 +127,7 @@ export default {
         addRule() {
             if (this.rules < 4) {
                 this.rules += 1
-                this.listRules.push({ min: '', max: '', score: '' })
+                this.listRules.push({ min: '', max: '', score: '', level: '' })
             }
         },
         deleteRule(index) {
@@ -127,7 +135,7 @@ export default {
             this.listRules.splice(index, 1)
         },
         addIndicator() {
-            this.indicator.rules = this.listRules            
+            this.indicator.rules = this.listRules
             IndicatorService.createIndicator(this.indicator).then(response => {
                 if (response.status == 200) {
                     this.$router.push("/indicators")
@@ -161,10 +169,18 @@ export default {
                     this.variables = response.data
                 }
             })
+        },
+        findAllRuleLevels() {
+            IndicatorService.findAllRuleLevels().then(response => {
+                if (response.status == 200) {
+                    this.ruleLevels = response.data
+                }
+            })
         }
     },
     mounted() {
         this.findAllVariables()
+        this.findAllRuleLevels()
     },
     created() {
         if (this.$route.params.key != null) {
@@ -196,7 +212,7 @@ label {
     border: 1px solid;
     border-radius: 10px;
     border-color: #3D3C84;
-    margin-bottom: 15px;
+    margin-bottom: 15px;    
 }
 
 form {
@@ -217,6 +233,11 @@ form {
 
 .second-part {
     width: 100%;
+}
+
+.second-part .input-simple{
+    margin-top: 2px;
+    max-width: 115px;
 }
 
 h4 {
@@ -245,7 +266,7 @@ textarea {
 .item-rule {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
 }
 
 .add-rule {
@@ -254,7 +275,7 @@ textarea {
     justify-content: space-between;
 }
 
-.rule-bound{
+.rule-bound {
     margin-right: 10px;
 }
 </style>
