@@ -21,7 +21,7 @@
 
     <div class="btn-bar">
         <div class="btn">
-            <button class="btn-simple" @click="makeCalculationReport()">Сформировать</button>
+            <button class="btn-simple" @click="makeCalculationOpopReport()">Сформировать</button>
         </div>
         <div class="btn">
             <button class="btn-simple" @click="saveReport()">Сохранить</button>
@@ -29,7 +29,7 @@
     </div>
 
     <div id="click-expand"></div>
-    <div class="wrap-expand-table" v-if="calculations.length != 0">
+    <div class="wrap-expand-table" v-if="reportData.length != 0">
         <a href="#close">Свернуть</a><a href="#click-expand">Развернуть</a>
         <table>
             <thead>
@@ -40,8 +40,8 @@
                     <td>Баллы</td>
                 </tr>
             </thead>
-            <tbody v-if="calculations.length != 0">
-                <tr v-for=" calculation in calculations" :key="calculation">
+            <tbody v-if="reportData.length != 0">
+                <tr v-for=" calculation in reportData.calculations" :key="calculation">
                     <td>
                         <div class="text">{{ calculation.indicatorName }}</div>
                     </td>
@@ -52,15 +52,15 @@
                 <tr>
                     <td><b>Итого</b></td>
                     <td></td>
-                    <td><b>{{ accreditationBool }}</b></td>
-                    <td class="summary-td"><b>{{ this.sum }} баллов</b></td>
+                    <td><b>{{ reportData.accreditationStatus }}</b></td>
+                    <td class="summary-td"><b>{{ reportData.sum }} баллов</b></td>
                 </tr>
             </tbody>
         </table>
         <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
     </div>
 
-    <div class="heading" v-if="calculations.length == 0 && isPerforming == true">
+    <div class="heading" v-if="reportData.length == 0 && isPerforming == true">
         <h4 style="margin-top: 150px;">Нет данных для указанного периода</h4>
     </div>
 </template>
@@ -81,9 +81,7 @@ export default {
             opops: [],
             date: '',
             opopId: '',
-            calculations: '',
-            sum: '',
-            accreditationBool: '',
+            reportData: '',
             isPerforming: false,
             existsDates: []
         }
@@ -109,57 +107,27 @@ export default {
                 console.log(ex)
             })
         },
-        makeCalculationReport() {
-            this.accreditationBool = ''
-            this.sum = 0
-            this.calculations = []
+        makeCalculationOpopReport() {
+            this.reportData = []
             this.isPerforming = true
-            ReportService.makeCalculationReport(this.opopId, this.date).then(response => {
+            ReportService.makeCalculationOpopReport(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
-                    this.calculations = response.data
-                    this.calculateSum()
+                    this.reportData = response.data
                 }
             }).catch((ex) => {
                 //alert(ex.response.data)
                 console.log(ex.response.data)
             })
         },
-        calculateSum() {
-            let ap1 = 0;
-            let ap11 = 0;
-            this.calculations.forEach((calculation) => {
-                if (calculation.id.indicatorKey === 'АП1') {
-                    ap1 = calculation.score
-                }
-                else if (calculation.id.indicatorKey === 'АП1.1') {
-                    ap11 = calculation.score
-                }
-                else {
-                    this.sum += calculation.score
-                }
-            })
-            if (ap11 != 0) {
-                this.sum += ap1 / ap11
-            }
-
-            let selectedOpop = {}
-            this.opops.forEach(opop => {
-                if (opop.id == this.opopId) {
-                    selectedOpop = opop
-                }
-            })
-            if (this.sum >= 70 && (selectedOpop.level == 'Бакалавриат' || selectedOpop.level == 'Специалитет')) {
-                this.accreditationBool = 'Аккредитован'
-            }
-            else if (this.sum >= 60 && (selectedOpop.level != 'Бакалавриат' || selectedOpop.level != 'Специалитет')) {
-                this.accreditationBool = 'Аккредитован'
-            }
-            else {
-                this.accreditationBool = 'Не аккредитован'
-            }
-        },
         saveReport() {
-            console.log("Report was saved")
+            ReportService.saveCalculationOpopReportExcel(this.opopId, this.date).then(response => {
+                if (response.status == 200) {
+                    alert("Отчет успешно сохранен в папку 'Загрузки' на Вашем компьютере")
+                }
+            }).catch((ex) => {
+                //alert(ex.response.data)
+                console.log(ex.response.data)
+            })
         }
     },
     mounted() {
