@@ -21,26 +21,42 @@
                 </div>
 
                 <div class="input-key">
+                    <label>Тип показателя</label>
+                    <select class="input-simple" v-model="indicator.boolType">
+                        <option :value="true">Булевый</option>
+                        <option :value="false">Обычный</option>
+                    </select>
+                </div>
+
+                <div class="input-key" v-if="indicator.boolType">
+                    <label>Значение</label>
+                    <div>
+                        <input type="checkbox" id="checkbox" v-model="indicator.boolValue" />
+                        <label for="checkbox" style="margin-left: 8px;">Соответствует</label>
+                    </div>
+                </div>
+
+                <div class="input-key" v-if="!indicator.boolType">
                     <label>Формула</label>
                     <input v-model="indicator.formula" class="input-simple" type="text" placeholder="Формула">
                 </div>
 
-                <div class="calculator-part">
+                <div class="calculator-part" v-if="!indicator.boolType">
                     <button v-for="variable in variables" :key="variable" :value="variable.key"
                         @click="clickVariable(variable.key)">
                         {{ variable.key }}</button>
                 </div>
-                <div class="calculator-part">
+                <div class="calculator-part" v-if="!indicator.boolType">
                     <button v-for="operator in operators" :key="operator" :value="operator"
                         @click="clickVariable(operator)">
                         {{ operator }}</button>
                 </div>
 
-                <div class="calculator-part">
+                <div class="calculator-part" v-if="!indicator.boolType">
                     <button v-for="number in numbers" :key="number" :value="number" @click="clickVariable(number)">
                         {{ number }}</button>
                 </div>
-                <div class="calculator-part">
+                <div class="calculator-part" v-if="!indicator.boolType">
                     <button @click="backspace()"><img src="../assets/backspace.png" width="18" height="18" /></button>
                 </div>
             </div>
@@ -95,6 +111,7 @@ export default {
     data() {
         return {
             indicator: {
+                boolType: false,
                 formula: ''
             },
             variables: [],
@@ -125,7 +142,12 @@ export default {
             })
         },
         addRule() {
-            if (this.rules < 4) {
+            if(this.indicator.boolType && this.rules < 2){
+                this.rules += 2
+                this.listRules.push({ min: 1, max: '', score: '', level: 'Высокий' })
+                this.listRules.push({ min: '', max: 1, score: '', level: 'Низкий' })
+            }
+            else if (!this.indicator.boolType && this.rules < 4) {
                 this.rules += 1
                 this.listRules.push({ min: '', max: '', score: '', level: '' })
             }
@@ -212,7 +234,7 @@ label {
     border: 1px solid;
     border-radius: 10px;
     border-color: #3D3C84;
-    margin-bottom: 15px;    
+    margin-bottom: 15px;
 }
 
 form {
@@ -235,7 +257,7 @@ form {
     width: 100%;
 }
 
-.second-part .input-simple{
+.second-part .input-simple {
     margin-top: 2px;
     max-width: 115px;
 }

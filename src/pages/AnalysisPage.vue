@@ -75,10 +75,18 @@
 
     <!-- График сравнения значений показателей по годам -->
     <div class="chart-list" v-if="showCharts === true && chartType === 'Line'">
-        <LineChart :data="this.chartIndicatorsByYearsData" :options="this.chartIndicatorsByYearsOptions" />
+        <LineChart :data="this.chartIndicatorsValuesByYearsData" :options="this.chartIndicatorsValuesByYearsOptions" />
     </div>
     <div class="chart-list" v-if="showCharts === true && chartType === 'Bar'">
-        <BarChart :data="this.chartIndicatorsByYearsData" :options="this.chartIndicatorsByYearsOptions" />
+        <BarChart :data="this.chartIndicatorsValuesByYearsData" :options="this.chartIndicatorsValuesByYearsOptions" />
+    </div>
+
+    <!-- График сравнения баллов показателей по годам -->
+    <div class="chart-list" v-if="showCharts === true && chartType === 'Line'">
+        <LineChart :data="this.chartIndicatorsScoresByYearsData" :options="this.chartIndicatorsScoresByYearsOptions" />
+    </div>
+    <div class="chart-list" v-if="showCharts === true && chartType === 'Bar'">
+        <BarChart :data="this.chartIndicatorsScoresByYearsData" :options="this.chartIndicatorsScoresByYearsOptions" />
     </div>
 
     <!-- График сравнения суммарного кол-ва баллов по годам -->
@@ -89,7 +97,7 @@
         <BarChart :data="this.chartScoresByYearsData" :options="this.chartScoresByYearsOptions" />
     </div>
 
-    <div class="recommendation-container" v-if="isPerforming">
+    <div class="recommendation-container" v-if="calculations.length != 0 && isPerforming">
         <div class="heading">
             <h4>Рекомендации</h4>
         </div>
@@ -132,11 +140,37 @@ export default {
             recommendationList: {},
             isPerforming: false,
 
-            chartIndicatorsByYearsData: {
+            chartIndicatorsValuesByYearsData: {
                 labels: [],
                 datasets: []
             },
-            chartIndicatorsByYearsOptions: {
+            chartIndicatorsValuesByYearsOptions: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Название графика',
+                        color: 'black',
+                        font: { family: 'Century Gothic', size: 20 },
+                        padding: 15
+                    },
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: { family: 'Century Gothic' },
+                            boxWidth: 40 /* ширина прямоугольника обозначения */
+                        },
+                        position: 'bottom'
+                    }
+                },
+            },
+
+            chartIndicatorsScoresByYearsData: {
+                labels: [],
+                datasets: []
+            },
+            chartIndicatorsScoresByYearsOptions: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
@@ -237,12 +271,35 @@ export default {
             this.showCharts = true
         },
         generateIndicatorsByYearsChart() {
-            this.chartIndicatorsByYearsData = { labels: [], datasets: [] }
-            this.chartIndicatorsByYearsOptions.plugins.title.text = 'Сравнение значений показателей по годам'
-            let preparedData = this.prepareDataForIndicatorsByYears()
-            this.chartIndicatorsByYearsData.labels = preparedData.labels
-            preparedData.sets.forEach(set => {
-                this.chartIndicatorsByYearsData.datasets.push(
+            // Сравнение значений
+            this.chartIndicatorsValuesByYearsData = { labels: [], datasets: [] }
+            this.chartIndicatorsValuesByYearsOptions.plugins.title.text = 'Сравнение значений показателей по годам'
+            let preparedValuesData = this.prepareDataForIndicatorsByYears()
+            this.chartIndicatorsValuesByYearsData.labels = preparedValuesData.labels
+            preparedValuesData.dataValues.forEach(set => {
+                this.chartIndicatorsValuesByYearsData.datasets.push(
+                    {
+                        label: set.key, //АП1                   
+                        data: set.values, //баллы
+
+                        tension: 0.2, /* степень изгиба линий */
+                        borderWidth: 1, /* толщина линий */
+                        pointHoverBorderColor: 'green', /* цвет границ точки при наведении курсора */
+                        pointHoverBackgroundColor: 'green', /* цвет точки при наведении курсора */
+                        pointHoverRadius: 4, /* радиус точки при наведении */
+                        spanGaps: false, /* если зачение отсутствует, линия прерывается */
+                        indexAxis: 'x', /* для транспонирования графика указать значение 'y' */
+                    }
+                )
+            })
+
+            // Сравнение баллов
+            this.chartIndicatorsScoresByYearsData = { labels: [], datasets: [] }
+            this.chartIndicatorsScoresByYearsOptions.plugins.title.text = 'Сравнение баллов показателей по годам'
+            let preparedScoresData = this.prepareDataForIndicatorsByYears()
+            this.chartIndicatorsScoresByYearsData.labels = preparedScoresData.labels
+            preparedScoresData.dataScores.forEach(set => {
+                this.chartIndicatorsScoresByYearsData.datasets.push(
                     {
                         label: set.key, //АП1                   
                         data: set.values, //баллы
@@ -262,18 +319,28 @@ export default {
             //let preparedData = [{labels: [], sets: [{label: '', data: []}]}]
             let dates = []
             let planned = []
-            let dataDictionary = {} //<IndicatorKey, [values]>
+            let dataValuesDictionary = {} //<IndicatorKey, [values]>
+            let dataScoresDictionary = {} //<IndicatorKey, [scores]>
             this.calculations.forEach(calculation => {
                 dates.push(calculation.id.date);
                 planned.push(calculation.planned)
                 let indicatorKey = calculation.id.indicatorKey
-                if (indicatorKey in dataDictionary) {
-                    let existValues = dataDictionary[indicatorKey] //сохраняем существующие значения
+
+                if (indicatorKey in dataValuesDictionary) {
+                    // Для значений
+                    let existValues = dataValuesDictionary[indicatorKey] //сохраняем существующие значения
                     existValues.push(calculation.value)
-                    dataDictionary[indicatorKey] = existValues
+                    dataValuesDictionary[indicatorKey] = existValues
+                    // Для баллов
+                    let existScores = dataScoresDictionary[indicatorKey] //сохраняем существующие значения
+                    existScores.push(calculation.score)                    
+                    dataScoresDictionary[indicatorKey] = existScores
                 }
                 else {
-                    dataDictionary[indicatorKey] = [calculation.value]
+                    // Для значений
+                    dataValuesDictionary[indicatorKey] = [calculation.value]
+                    // Для баллов
+                    dataScoresDictionary[indicatorKey] = [calculation.score]
                 }
             })
 
@@ -284,10 +351,11 @@ export default {
                     values: dictionary[key]
                 }));
             };
-            let dataArray = dictionaryToArrayOfObjects(dataDictionary)
+            let dataValuesArray = dictionaryToArrayOfObjects(dataValuesDictionary)
+            let dataScoresArray = dictionaryToArrayOfObjects(dataScoresDictionary)
             let uniqueDates = [...new Set(dates)]
 
-            let preparedData = { labels: uniqueDates, sets: dataArray, planned: planned }
+            let preparedData = { labels: uniqueDates, dataValues: dataValuesArray, dataScores: dataScoresArray, planned: planned }
             return preparedData;
         },
         generateScoresByYearsChart() {

@@ -19,6 +19,11 @@ class ValueService{
         return axios.get(URL)
     }
 
+    findDatesByOpop(opopId){
+        let URL = VALUE_API_BASE_URL + '/by-opop?opopId=' + opopId
+        return axios.get(URL)
+    }
+
     //POST
     addValuesList(valuesList){
         let URL = VALUE_API_BASE_URL + '/list'

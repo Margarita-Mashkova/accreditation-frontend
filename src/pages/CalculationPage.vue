@@ -12,7 +12,10 @@
         </div>
         <div class="filter-item">
             <label>Дата</label>
-            <input class="input-simple" type="date" v-model="date">
+            <select class="input-simple" v-model="date">
+                <option v-for="date in existsDates" :key="date" :value="date">{{ date }}</option>
+            </select>
+            <!-- <input class="input-simple" type="date" v-model="date"> -->
         </div>
     </div>
 
@@ -66,6 +69,7 @@
 import PageHeader from '@/components/PageHeader.vue'
 import OpopService from '@/services/OpopService'
 import ReportService from '@/services/ReportService'
+import ValueService from '@/services/ValueService';
 
 export default {
     name: "CalculationPage",
@@ -80,7 +84,8 @@ export default {
             calculations: '',
             sum: '',
             accreditationBool: '',
-            isPerforming: false
+            isPerforming: false,
+            existsDates: []
         }
     },
     methods: {
@@ -89,8 +94,19 @@ export default {
                 if (response.status == 200) {
                     this.opops = response.data
                     this.opopId = this.opops[0].id
-                    this.date = new Date().toJSON().split("T")[0]
+                    //this.date = new Date().toJSON().split("T")[0]
+                    this.findAllDates()
                 }
+            })
+        },
+        findAllDates() {
+            ValueService.findDatesByOpop(this.opopId).then(response => {
+                if (response.status == 200) {
+                    this.existsDates = response.data
+                    this.date = this.existsDates[0]
+                }
+            }).catch((ex) => {
+                console.log(ex)
             })
         },
         makeCalculationReport() {
@@ -135,10 +151,10 @@ export default {
             if (this.sum >= 70 && (selectedOpop.level == 'Бакалавриат' || selectedOpop.level == 'Специалитет')) {
                 this.accreditationBool = 'Аккредитован'
             }
-            else if(this.sum >= 60 && (selectedOpop.level != 'Бакалавриат' || selectedOpop.level != 'Специалитет')){
+            else if (this.sum >= 60 && (selectedOpop.level != 'Бакалавриат' || selectedOpop.level != 'Специалитет')) {
                 this.accreditationBool = 'Аккредитован'
             }
-            else{
+            else {
                 this.accreditationBool = 'Не аккредитован'
             }
         },
@@ -148,6 +164,11 @@ export default {
     },
     mounted() {
         this.findAllOpops()
+    },
+    watch: {
+        'opopId'() {
+            this.findAllDates()
+        }
     }
 };
 </script>
@@ -212,6 +233,7 @@ table,
 td {
     color: black;
     margin: 15px 0px;
+    text-align-last: center;
 }
 
 td {
@@ -255,6 +277,7 @@ h4 {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     height: 60px;
+    text-align-last: auto;
 }
 
 .wrap-expand-table {
