@@ -97,17 +97,23 @@
         <BarChart :data="this.chartScoresByYearsData" :options="this.chartScoresByYearsOptions" />
     </div>
 
-    <div class="recommendation-container" v-if="calculations.length != 0 && isPerforming">
+    <div class="recommendation-container" v-if="calculations.length != 0 && isPerforming &&
+                (recommendationList.middle != '' || recommendationList.low != '')">
         <div class="heading">
             <h4>Рекомендации</h4>
         </div>
         <div class="recommendation">
-            <text>Следует обратить внимание на следующие показатели, т.к. на текущий <i><u>{{ this.nowYear }} г.</u></i> они имеют 
+            <text>Следует обратить внимание на следующие показатели, т.к. на текущий <i><u>{{ this.nowYear }} г.</u></i>
+                они имеют
                 недостаточно высокий уровень баллов:<br></text>
-            <text style="color: #ff8f00"><b><u>Средний</u></b></text><text> уровень значений имеют показатели: </text>
-            <text><i><b>{{ recommendationList.middle }}</b></i>.</text>
-            <text style="color: red"><br><b><u>Низкий</u></b></text><text> уровень значений имеют показатели: </text>
-            <text><i><b>{{ recommendationList.low }}</b></i>.</text>
+            <div v-if="recommendationList.middle != ''">
+                <text style="color: #ff8f00"><b><u>Средний</u></b></text><text> уровень значений имеют показатели: </text>
+                <text><i><b>{{ recommendationList.middle }}</b></i>.</text>
+            </div>
+            <div v-if="recommendationList.low != ''">
+                <text style="color: red"><b><u>Низкий</u></b></text><text> уровень значений имеют показатели: </text>
+                <text><i><b>{{ recommendationList.low }}</b></i>.</text>
+            </div>
         </div>
     </div>
 </template>
@@ -333,7 +339,7 @@ export default {
                     dataValuesDictionary[indicatorKey] = existValues
                     // Для баллов
                     let existScores = dataScoresDictionary[indicatorKey] //сохраняем существующие значения
-                    existScores.push(calculation.score)                    
+                    existScores.push(calculation.score)
                     dataScoresDictionary[indicatorKey] = existScores
                 }
                 else {
@@ -466,6 +472,7 @@ export default {
                 }
             })
             this.recommendationList = { middle: middleScore.join(", "), low: lowScore.join(", ") }
+            console.log(this.recommendationList)
         },
         saveReport() {
             console.log("Report was saved")
