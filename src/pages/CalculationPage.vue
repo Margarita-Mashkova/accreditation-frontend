@@ -56,6 +56,10 @@
         </table>
         <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
     </div>
+
+    <div class="heading" v-if="calculations.length == 0 && isPerforming == true">
+        <h4 style="margin-top: 150px;">Нет данных для указанного периода</h4>
+    </div>
 </template>
 
 <script>
@@ -75,7 +79,8 @@ export default {
             opopId: '',
             calculations: '',
             sum: '',
-            accreditationBool: ''
+            accreditationBool: '',
+            isPerforming: false
         }
     },
     methods: {
@@ -92,6 +97,7 @@ export default {
             this.accreditationBool = ''
             this.sum = 0
             this.calculations = []
+            this.isPerforming = true
             ReportService.makeCalculationReport(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
                     this.calculations = response.data

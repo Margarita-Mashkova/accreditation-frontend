@@ -59,17 +59,48 @@
         </table>
         <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
     </div>
+    <div class="heading" v-if="calculations.length == 0 && isPerforming">
+        <h4 style="margin-top: 150px;">Нет данных для указанного периода</h4>
+    </div>
+
+    <div class="filter" v-if="calculations.length != 0 && isPerforming">
+        <div class="filter-item">
+            <label>Тип графиков</label>
+            <select class="input-simple" v-model="chartType">
+                <option :value="'Line'">Линейный</option>
+                <option :value="'Bar'">Столбчатый</option>
+            </select>
+        </div>
+    </div>
+
     <!-- График сравнения значений показателей по годам -->
     <div class="chart-list" v-if="showCharts === true && chartType === 'Line'">
-        <LineChart :data="this.chartIndicatorsByYearsData" :options="this.chartOptions" />
+        <LineChart :data="this.chartIndicatorsByYearsData" :options="this.chartIndicatorsByYearsOptions" />
     </div>
     <div class="chart-list" v-if="showCharts === true && chartType === 'Bar'">
-        <BarChart :data="this.chartIndicatorsByYearsData" :options="this.chartOptions" />
+        <BarChart :data="this.chartIndicatorsByYearsData" :options="this.chartIndicatorsByYearsOptions" />
     </div>
 
     <!-- График сравнения суммарного кол-ва баллов по годам -->
-    <div class="chart-list" v-if="showCharts === true">
-        <BarChart :data="this.chartScoresByYearsData" :options="this.chartOptions" />
+    <div class="chart-list" v-if="showCharts === true && chartType === 'Line'">
+        <LineChart :data="this.chartScoresByYearsData" :options="this.chartScoresByYearsOptions" />
+    </div>
+    <div class="chart-list" v-if="showCharts === true && chartType === 'Bar'">
+        <BarChart :data="this.chartScoresByYearsData" :options="this.chartScoresByYearsOptions" />
+    </div>
+
+    <div class="recommendation-container" v-if="isPerforming">
+        <div class="heading">
+            <h4>Рекомендации</h4>
+        </div>
+        <div class="recommendation">
+            <text>Следует обратить внимание на следующие показатели, т.к. на текущий <i><u>{{ this.nowYear }} г.</u></i> они имеют 
+                недостаточно высокий уровень баллов:<br></text>
+            <text style="color: #ff8f00"><b><u>Средний</u></b></text><text> уровень значений имеют показатели: </text>
+            <text><i><b>{{ recommendationList.middle }}</b></i>.</text>
+            <text style="color: red"><br><b><u>Низкий</u></b></text><text> уровень значений имеют показатели: </text>
+            <text><i><b>{{ recommendationList.low }}</b></i>.</text>
+        </div>
     </div>
 </template>
 
@@ -93,21 +124,45 @@ export default {
             calculations: [],
             dateStart: '',
             dateEnd: '',
+            nowYear: '',
             opopId: '',
             amountIndicators: '',
             chartType: '',
             showCharts: false,
+            recommendationList: {},
+            isPerforming: false,
 
             chartIndicatorsByYearsData: {
                 labels: [],
                 datasets: []
             },
+            chartIndicatorsByYearsOptions: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Название графика',
+                        color: 'black',
+                        font: { family: 'Century Gothic', size: 20 },
+                        padding: 15
+                    },
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: { family: 'Century Gothic' },
+                            boxWidth: 40 /* ширина прямоугольника обозначения */
+                        },
+                        position: 'bottom'
+                    }
+                },
+            },
+
             chartScoresByYearsData: {
                 labels: [],
                 datasets: []
             },
-
-            chartOptions: {
+            chartScoresByYearsOptions: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
@@ -127,7 +182,7 @@ export default {
                         position: 'bottom'
                     }
                 }
-            }
+            },
         }
     },
     methods: {
@@ -154,6 +209,8 @@ export default {
             })
         },
         findCalculationsByPeriod() {
+            this.showCharts = false
+            this.isPerforming = true
             if (this.dateStart <= this.dateEnd) {
                 CalculationService.findCalculationsByPeriod(this.opopId, this.dateStart, this.dateEnd).then(response => {
                     if (response.status == 200) {
@@ -162,6 +219,7 @@ export default {
                             this.findAllIndicators()
                             this.convertPlannedField()
                             this.generateCharts()
+                            this.generateRecommendations()
                         }
                     }
                 }).catch((ex) => {
@@ -180,7 +238,7 @@ export default {
         },
         generateIndicatorsByYearsChart() {
             this.chartIndicatorsByYearsData = { labels: [], datasets: [] }
-            this.chartOptions.plugins.title.text = 'Сравнение значений показателей по годам'
+            this.chartIndicatorsByYearsOptions.plugins.title.text = 'Сравнение значений показателей по годам'
             let preparedData = this.prepareDataForIndicatorsByYears()
             this.chartIndicatorsByYearsData.labels = preparedData.labels
             preparedData.sets.forEach(set => {
@@ -203,9 +261,11 @@ export default {
         prepareDataForIndicatorsByYears() {
             //let preparedData = [{labels: [], sets: [{label: '', data: []}]}]
             let dates = []
+            let planned = []
             let dataDictionary = {} //<IndicatorKey, [values]>
             this.calculations.forEach(calculation => {
                 dates.push(calculation.id.date);
+                planned.push(calculation.planned)
                 let indicatorKey = calculation.id.indicatorKey
                 if (indicatorKey in dataDictionary) {
                     let existValues = dataDictionary[indicatorKey] //сохраняем существующие значения
@@ -227,12 +287,12 @@ export default {
             let dataArray = dictionaryToArrayOfObjects(dataDictionary)
             let uniqueDates = [...new Set(dates)]
 
-            let preparedData = { labels: uniqueDates, sets: dataArray }
+            let preparedData = { labels: uniqueDates, sets: dataArray, planned: planned }
             return preparedData;
         },
         generateScoresByYearsChart() {
             this.chartScoresByYearsData = { labels: [], datasets: [] }
-            this.chartOptions.plugins.title.text = 'Сравнение суммарного количества баллов по годам'
+            this.chartScoresByYearsOptions.plugins.title.text = 'Сравнение суммарного количества баллов по годам'
             let preparedData = this.prepareDataForScoresByYears()
             this.chartScoresByYearsData.labels = preparedData.labels
             this.chartScoresByYearsData.datasets.push(
@@ -266,35 +326,34 @@ export default {
             let curDate = sortedCalculations[0].id.date
             let arrCalculationsByYear = []
             let arrCalculations = []
-            sortedCalculations.forEach(calc =>{
-                if(calc.id.date == curDate){
+            sortedCalculations.forEach(calc => {
+                if (calc.id.date == curDate) {
                     arrCalculations.push(calc)
                 }
-                else{
-                    arrCalculationsByYear.push({date: curDate, calculations: arrCalculations})
+                else {
+                    arrCalculationsByYear.push({ date: curDate, calculations: arrCalculations })
                     curDate = calc.id.date
                     arrCalculations = [calc]
                 }
             })
-            arrCalculationsByYear.push({date: curDate, calculations: arrCalculations})
+            arrCalculationsByYear.push({ date: curDate, calculations: arrCalculations })
 
             let scores = []
             let dates = []
-            arrCalculationsByYear.forEach(calcByYear =>{
+            arrCalculationsByYear.forEach(calcByYear => {
                 let sum = this.calculateSum(calcByYear.calculations)
                 scores.push(sum)
                 dates.push(calcByYear.date)
             })
-            
+
             let preparedData = { labels: dates, values: scores }
-            console.log(preparedData)
             return preparedData;
         },
-        calculateSum(calculations) {            
+        calculateSum(calculations) {
             let sum = 0;
             let ap1 = 0;
             let ap11 = 0;
-            calculations.forEach((calculation) => {                
+            calculations.forEach((calculation) => {
                 if (calculation.id.indicatorKey === 'АП1') {
                     ap1 = calculation.score
                 }
@@ -318,6 +377,27 @@ export default {
                     calculation.planned = 'Нет'
                 }
             })
+        },
+        generateRecommendations() {
+            let today = new Date().toJSON().split("T")[0]
+            this.nowYear = today.split('-')[0]
+            let currentCalculations = []
+            this.calculations.forEach(calc => {
+                if (calc.id.date.split('-')[0] == this.nowYear) {
+                    currentCalculations.push(calc)
+                }
+            })
+            let middleScore = []
+            let lowScore = []
+            currentCalculations.forEach(calc => {
+                if (calc.level === 'Низкий') {
+                    lowScore.push(calc.id.indicatorKey)
+                }
+                else if (calc.level === 'Средний') {
+                    middleScore.push(calc.id.indicatorKey)
+                }
+            })
+            this.recommendationList = { middle: middleScore.join(", "), low: lowScore.join(", ") }
         },
         saveReport() {
             console.log("Report was saved")
@@ -440,11 +520,24 @@ h4 {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    margin: 0px 300px;
+    margin: 0px 250px 10px 250px;
+}
+
+.recommendation-container {
+    margin: 10px 150px;
+}
+
+.recommendation {
+    font-size: 13pt;
+    color: black;
+    border: 1px solid #3D3C84;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 40px;
 }
 
 .wrap-expand-table {
-    margin: 20px 200px 10px 200px;
+    margin: 10px 150px 10px 150px;
     text-align: -webkit-right;
 }
 
@@ -453,7 +546,6 @@ h4 {
     text-decoration: none;
     border-bottom: 1px dashed;
     color: black;
-    align-self: last baseline;
 }
 
 /* Если браузер не поддерживает структурные псевдоклассы, то список будет раскрыт и доступ к данным сохранится */
