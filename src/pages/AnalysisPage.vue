@@ -107,7 +107,8 @@
                 они имеют
                 недостаточно высокий уровень баллов:<br></text>
             <div v-if="recommendationList.middle != ''">
-                <text style="color: #ff8f00"><b><u>Средний</u></b></text><text> уровень значений имеют показатели: </text>
+                <text style="color: #ff8f00"><b><u>Средний</u></b></text><text> уровень значений имеют показатели:
+                </text>
                 <text><i><b>{{ recommendationList.middle }}</b></i>.</text>
             </div>
             <div v-if="recommendationList.low != ''">
@@ -125,6 +126,7 @@ import BarChart from '@/components/BarChart.vue'
 import CalculationService from '@/services/CalculationService'
 import IndicatorService from '@/services/IndicatorService'
 import OpopService from '@/services/OpopService'
+import ReportService from '@/services/ReportService'
 
 export default {
     name: "AnalysisPage",
@@ -145,6 +147,7 @@ export default {
             showCharts: false,
             recommendationList: {},
             isPerforming: false,
+            indicatorsPreparedData: [],
 
             chartIndicatorsValuesByYearsData: {
                 labels: [],
@@ -248,6 +251,14 @@ export default {
                 }
             })
         },
+        loadDataforCharts(){
+            ReportService.makeAnalysisReport(this.opopId, this.dateStart, this.dateEnd).then(response => {
+                if (response.status == 200) {
+                    this.indicatorsPreparedData = response.data
+                    this.generateCharts()
+                }
+            })
+        },
         findCalculationsByPeriod() {
             this.showCharts = false
             this.isPerforming = true
@@ -258,7 +269,7 @@ export default {
                         if (this.calculations.length != 0) {
                             this.findAllIndicators()
                             this.convertPlannedField()
-                            this.generateCharts()
+                            this.loadDataforCharts()
                             this.generateRecommendations()
                         }
                     }
@@ -277,16 +288,20 @@ export default {
             this.showCharts = true
         },
         generateIndicatorsByYearsChart() {
-            // Сравнение значений
             this.chartIndicatorsValuesByYearsData = { labels: [], datasets: [] }
+            this.chartIndicatorsScoresByYearsData = { labels: [], datasets: [] }
+            // Сравнение значений
             this.chartIndicatorsValuesByYearsOptions.plugins.title.text = 'Сравнение значений показателей по годам'
-            let preparedValuesData = this.prepareDataForIndicatorsByYears()
-            this.chartIndicatorsValuesByYearsData.labels = preparedValuesData.labels
-            preparedValuesData.dataValues.forEach(set => {
+            this.chartIndicatorsValuesByYearsData.labels = this.indicatorsPreparedData[0].dates
+            // Сравнение баллов
+            this.chartIndicatorsScoresByYearsOptions.plugins.title.text = 'Сравнение баллов показателей по годам'
+            this.chartIndicatorsScoresByYearsData.labels = this.indicatorsPreparedData[0].dates
+            this.indicatorsPreparedData.forEach(set => {
+                // Сравнение значений
                 this.chartIndicatorsValuesByYearsData.datasets.push(
                     {
-                        label: set.key, //АП1                   
-                        data: set.values, //баллы
+                        label: set.indicatorKey, //АП1                   
+                        data: set.values, //значения
 
                         tension: 0.2, /* степень изгиба линий */
                         borderWidth: 1, /* толщина линий */
@@ -297,18 +312,11 @@ export default {
                         indexAxis: 'x', /* для транспонирования графика указать значение 'y' */
                     }
                 )
-            })
-
-            // Сравнение баллов
-            this.chartIndicatorsScoresByYearsData = { labels: [], datasets: [] }
-            this.chartIndicatorsScoresByYearsOptions.plugins.title.text = 'Сравнение баллов показателей по годам'
-            let preparedScoresData = this.prepareDataForIndicatorsByYears()
-            this.chartIndicatorsScoresByYearsData.labels = preparedScoresData.labels
-            preparedScoresData.dataScores.forEach(set => {
+                // Сравнение баллов
                 this.chartIndicatorsScoresByYearsData.datasets.push(
                     {
-                        label: set.key, //АП1                   
-                        data: set.values, //баллы
+                        label: set.indicatorKey, //АП1                   
+                        data: set.scores, //баллы
 
                         tension: 0.2, /* степень изгиба линий */
                         borderWidth: 1, /* толщина линий */
@@ -321,49 +329,7 @@ export default {
                 )
             })
         },
-        prepareDataForIndicatorsByYears() {
-            //let preparedData = [{labels: [], sets: [{label: '', data: []}]}]
-            let dates = []
-            let planned = []
-            let dataValuesDictionary = {} //<IndicatorKey, [values]>
-            let dataScoresDictionary = {} //<IndicatorKey, [scores]>
-            this.calculations.forEach(calculation => {
-                dates.push(calculation.id.date);
-                planned.push(calculation.planned)
-                let indicatorKey = calculation.id.indicatorKey
 
-                if (indicatorKey in dataValuesDictionary) {
-                    // Для значений
-                    let existValues = dataValuesDictionary[indicatorKey] //сохраняем существующие значения
-                    existValues.push(calculation.value)
-                    dataValuesDictionary[indicatorKey] = existValues
-                    // Для баллов
-                    let existScores = dataScoresDictionary[indicatorKey] //сохраняем существующие значения
-                    existScores.push(calculation.score)
-                    dataScoresDictionary[indicatorKey] = existScores
-                }
-                else {
-                    // Для значений
-                    dataValuesDictionary[indicatorKey] = [calculation.value]
-                    // Для баллов
-                    dataScoresDictionary[indicatorKey] = [calculation.score]
-                }
-            })
-
-            //функция преобразования словаря в массив объектов
-            const dictionaryToArrayOfObjects = (dictionary) => {
-                return Object.keys(dictionary).map(key => ({
-                    key: key,
-                    values: dictionary[key]
-                }));
-            };
-            let dataValuesArray = dictionaryToArrayOfObjects(dataValuesDictionary)
-            let dataScoresArray = dictionaryToArrayOfObjects(dataScoresDictionary)
-            let uniqueDates = [...new Set(dates)]
-
-            let preparedData = { labels: uniqueDates, dataValues: dataValuesArray, dataScores: dataScoresArray, planned: planned }
-            return preparedData;
-        },
         generateScoresByYearsChart() {
             this.chartScoresByYearsData = { labels: [], datasets: [] }
             this.chartScoresByYearsOptions.plugins.title.text = 'Сравнение суммарного количества баллов по годам'
@@ -395,7 +361,12 @@ export default {
                 }
                 return 0;
             }
-            const sortedCalculations = this.calculations.sort(sortByDate);
+            // Копирование данных в массив, чтобы не сортировать исходный
+            let tempCalculations = []
+            this.calculations.forEach(calc => {
+                tempCalculations.push(calc)
+            })
+            const sortedCalculations = tempCalculations.sort(sortByDate);
             // Делим весь массив вычислений на подмассивы по годам
             let curDate = sortedCalculations[0].id.date
             let arrCalculationsByYear = []
@@ -443,6 +414,7 @@ export default {
             }
             return sum;
         },
+        
         convertPlannedField() {
             this.calculations.forEach((calculation) => {
                 if (calculation.planned) {
@@ -472,10 +444,16 @@ export default {
                 }
             })
             this.recommendationList = { middle: middleScore.join(", "), low: lowScore.join(", ") }
-            console.log(this.recommendationList)
         },
         saveReport() {
-            console.log("Report was saved")
+            ReportService.saveAnalysisReportExcel(this.opopId, this.dateStart, this.dateEnd).then(response => {
+                if (response.status == 200) {
+                    alert("Отчет успешно сохранен в папку 'Загрузки' на Вашем компьютере")
+                }
+            }).catch((ex) => {
+                //alert(ex.response.data)
+                console.log(ex.response.data)
+            })
         }
     },
     mounted() {
