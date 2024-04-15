@@ -4,11 +4,15 @@
         <h4>Расчет аккредитационных показателей</h4>
     </div>
     <div class="filter">
-        <div class="filter-item">
+        <div class="filter-item" v-if="currentUser.role == 'DEAN'">
             <label>ОПОП</label>
             <select class="input-simple" v-model="opopId">
                 <option v-for="opop in opops" :key="opop" :value="opop.id">{{ opop.name }}</option>
             </select>
+        </div>
+        <div class="filter-item" v-else>
+            <label>ОПОП</label>
+            <input v-model="opopName" class="input-simple" type="text" disabled>
         </div>
         <div class="filter-item">
             <label>Дата</label>
@@ -69,7 +73,8 @@
 import PageHeader from '@/components/PageHeader.vue'
 import OpopService from '@/services/OpopService'
 import ReportService from '@/services/ReportService'
-import ValueService from '@/services/ValueService';
+import ValueService from '@/services/ValueService'
+import ProfileService from '@/services/ProfileService'
 
 export default {
     name: "CalculationPage",
@@ -83,7 +88,9 @@ export default {
             opopId: '',
             reportData: '',
             isPerforming: false,
-            existsDates: []
+            existsDates: [],
+            currentUser: '',
+            opopName: ''
         }
     },
     methods: {
@@ -91,7 +98,9 @@ export default {
             OpopService.findAllOpops().then(response => {
                 if (response.status == 200) {
                     this.opops = response.data
-                    this.opopId = this.opops[0].id
+                    if (this.currentUser.role == "DEAN") {
+                        this.opopId = this.opops[0].id
+                    }
                     //this.date = new Date().toJSON().split("T")[0]
                     this.findAllDates()
                 }
@@ -128,10 +137,23 @@ export default {
                 //alert(ex.response.data)
                 console.log(ex.response.data)
             })
-        }
+        },
+        me() {
+            ProfileService.me().then(response => {
+                if (response.status == 200) {
+                    this.currentUser = response.data
+                    if (this.currentUser.role == "MANAGER") {
+                        this.opopId = this.currentUser.opops[0].id
+                        this.opopName = this.currentUser.opops[0].name
+                    }
+                    console.log(this.currentUser)
+                }
+            })
+        },
     },
     mounted() {
         this.findAllOpops()
+        this.me()
     },
     watch: {
         'opopId'() {

@@ -49,12 +49,14 @@ export default {
     methods: {
         logout() {
             localStorage.setItem('jwt', null)
+            localStorage.setItem('role', null)
             console.log(localStorage.getItem('jwt'))
         },
         me() {
             ProfileService.me().then(response => {
                 if (response.status == 200) {
                     this.user = response.data
+                    localStorage.setItem("role", this.user.role)
                 }
             }).catch((ex) => {
                 alert(ex.response.data)

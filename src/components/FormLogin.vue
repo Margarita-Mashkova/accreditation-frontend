@@ -36,7 +36,7 @@ export default {
                 .then((response) => {
                     if (response.status == 200) {
                         console.log("токен " + response.data);
-                        localStorage.setItem("jwt", response.data);
+                        localStorage.setItem("jwt", response.data);                        
                     }
                     window.location.href = '/edit-profile';
                 })

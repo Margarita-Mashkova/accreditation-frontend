@@ -5,11 +5,15 @@
     </div>
 
     <div class="filter">
-        <div class="filter-item">
+        <div class="filter-item" v-if="currentUser.role == 'DEAN'">
             <label>ОПОП</label>
             <select class="input-simple" v-model="opopId">
                 <option v-for="opop in opops" :key="opop" :value="opop.id">{{ opop.name }}</option>
             </select>
+        </div>
+        <div class="filter-item" v-else>
+            <label>ОПОП</label>
+            <input v-model="opopName" class="input-simple" type="text" disabled>
         </div>
         <div class="filter-item">
             <label>Дата начала периода</label>
@@ -127,6 +131,7 @@ import CalculationService from '@/services/CalculationService'
 import IndicatorService from '@/services/IndicatorService'
 import OpopService from '@/services/OpopService'
 import ReportService from '@/services/ReportService'
+import ProfileService from '@/services/ProfileService'
 
 export default {
     name: "AnalysisPage",
@@ -141,6 +146,8 @@ export default {
             dateStart: '',
             dateEnd: '',
             nowYear: '',
+            currentUser: '',
+            opopName: '',
             opopId: '',
             amountIndicators: '',
             chartType: '',
@@ -233,7 +240,9 @@ export default {
             OpopService.findAllOpops().then(response => {
                 if (response.status == 200) {
                     this.opops = response.data
-                    this.opopId = this.opops[0].id
+                    if (this.currentUser.role == "DEAN") {
+                        this.opopId = this.opops[0].id
+                    }
                 }
             })
         },
@@ -414,7 +423,7 @@ export default {
             }
             return sum;
         },
-        
+
         convertPlannedField() {
             this.calculations.forEach((calculation) => {
                 if (calculation.planned) {
@@ -454,9 +463,22 @@ export default {
                 //alert(ex.response.data)
                 console.log(ex.response.data)
             })
-        }
+        },
+        me() {
+            ProfileService.me().then(response => {
+                if (response.status == 200) {
+                    this.currentUser = response.data
+                    if (this.currentUser.role == "MANAGER") {
+                        this.opopId = this.currentUser.opops[0].id
+                        this.opopName = this.currentUser.opops[0].name
+                    }
+                    console.log(this.currentUser)
+                }
+            })
+        },
     },
     mounted() {
+        this.me()
         this.dateStart = new Date().toJSON().split("T")[0]
         this.dateEnd = new Date().toJSON().split("T")[0]
         this.findAllOpops()
