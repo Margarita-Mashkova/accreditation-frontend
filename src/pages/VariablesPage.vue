@@ -43,6 +43,7 @@
 <script>
 import PageHeader from '@/components/PageHeader.vue'
 import VariableService from '@/services/VariableService'
+import NProgress from "nprogress"
 
 export default {
     name: "VariablesPage",
@@ -70,6 +71,7 @@ export default {
                     this.getAmountPages()
                     this.variables = response.data
                 }
+                NProgress.done(true)
             })
         },
         openCreateVariableFrom() {

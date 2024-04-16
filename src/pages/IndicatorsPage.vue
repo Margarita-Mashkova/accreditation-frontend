@@ -49,6 +49,7 @@
 <script>
 import PageHeader from '@/components/PageHeader.vue'
 import IndicatorService from '@/services/IndicatorService'
+import NProgress from "nprogress"
 
 export default {
     name: "IndicatorsPage",
@@ -79,6 +80,7 @@ export default {
                     this.getAmountPages()
                     this.indicators = response.data
                 }
+                NProgress.done(true)
             })
         },
         openCreateIndicatorFrom() {

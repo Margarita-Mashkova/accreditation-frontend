@@ -53,6 +53,7 @@
 <script>
 import PageHeader from '@/components/PageHeader.vue';
 import UserService from '@/services/UserService'
+import NProgress from "nprogress"
 
 export default {
     name: "PageUsers",
@@ -80,6 +81,7 @@ export default {
                     this.getAmountPages()
                     this.users = response.data
                 }
+                NProgress.done(true)
             })
         },
         openCreateUserFrom() {

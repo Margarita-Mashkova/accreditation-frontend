@@ -23,6 +23,7 @@
 
 <script>
 import VariableService from '@/services/VariableService'
+import NProgress from "nprogress"
 
 export default {
     data() {
@@ -36,6 +37,7 @@ export default {
                 if (response.status == 200) {
                     this.variable = response.data
                 }
+                NProgress.done(true)
             }).catch((ex) => {
                 alert(ex.response.data)
                 console.log(ex.response.data)
@@ -75,6 +77,9 @@ export default {
     created() {
         if (this.$route.params.key != null) {
             this.findVariable()
+        }
+        else{
+            NProgress.done(true)
         }
     }
 }

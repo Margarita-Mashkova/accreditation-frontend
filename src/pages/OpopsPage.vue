@@ -45,6 +45,7 @@
 <script>
 import PageHeader from '@/components/PageHeader.vue';
 import OpopService from '@/services/OpopService'
+import NProgress from "nprogress"
 
 export default {
     name: "OpopsPage",
@@ -72,6 +73,7 @@ export default {
                     this.getAmountPages()
                     this.opops = response.data
                 }
+                NProgress.done(true)
             })
         },
         openCreateOpopFrom() {

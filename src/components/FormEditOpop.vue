@@ -23,7 +23,8 @@
 
 <script>
 import UserService from '@/services/UserService'
-import OpopService from '@/services/OpopService';
+import OpopService from '@/services/OpopService'
+import NProgress from "nprogress"
 
 export default {
     data() {
@@ -75,6 +76,7 @@ export default {
                         this.findUserByLogin(this.opop.userLogin)
                     }
                 }
+                NProgress.done(true)
             }).catch((ex) => {
                 alert(ex.response.data)
                 console.log(ex.response.data)
@@ -117,6 +119,9 @@ export default {
     created() {
         if (this.$route.params.id != null) {
             this.findOpop()
+        }
+        else{
+            NProgress.done(true)
         }
     }
 }

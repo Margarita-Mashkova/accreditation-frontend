@@ -1,4 +1,5 @@
 import * as VueRouter from "vue-router";
+import NProgress from 'nprogress';
 
 import PageLogin from "@/pages/LoginPage";
 import PageUsers from "@/pages/UsersPage";
@@ -63,6 +64,8 @@ let router = new VueRouter.createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+    NProgress.start()
+
     // Если не авторизирован
     if (localStorage.getItem('jwt') == 'null') {
         if (to.path == '/auth') {
@@ -82,4 +85,11 @@ router.beforeEach((to, from, next) => {
         }
     }
 })
+
+router.afterEach((to) => {
+    if (to.name == "not-found" || to.name == "forbidden" || to.name == 'login') {
+        NProgress.done(true)
+    }
+})
+
 export default router;

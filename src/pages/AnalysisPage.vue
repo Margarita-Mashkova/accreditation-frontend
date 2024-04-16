@@ -132,6 +132,7 @@ import IndicatorService from '@/services/IndicatorService'
 import OpopService from '@/services/OpopService'
 import ReportService from '@/services/ReportService'
 import ProfileService from '@/services/ProfileService'
+import NProgress from "nprogress"
 
 export default {
     name: "AnalysisPage",
@@ -244,6 +245,7 @@ export default {
                         this.opopId = this.opops[0].id
                     }
                 }
+                NProgress.done(true)
             })
         },
         findAllIndicators() {
@@ -265,10 +267,11 @@ export default {
                 if (response.status == 200) {
                     this.indicatorsPreparedData = response.data
                     this.generateCharts()
-                }
+                }                
             })
         },
         findCalculationsByPeriod() {
+            NProgress.start()
             this.showCharts = false
             this.isPerforming = true
             if (this.dateStart <= this.dateEnd) {
@@ -282,6 +285,7 @@ export default {
                             this.generateRecommendations()
                         }
                     }
+                    NProgress.done(true)
                 }).catch((ex) => {
                     //alert(ex.response.data)
                     console.log(ex)

@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from "@/router/router";
 import axios from "axios";
+import 'nprogress/nprogress.css';
 
 const token = localStorage.getItem('jwt')
 if (token) {

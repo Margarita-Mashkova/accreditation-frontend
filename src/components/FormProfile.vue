@@ -20,6 +20,7 @@
 <script>
 import InputIcon from "./InputIcon.vue";
 import ProfileService from "@/services/ProfileService";
+import NProgress from "nprogress";
 
 export default {
     components: {
@@ -40,6 +41,7 @@ export default {
                     this.login = this.user.login
                     console.log("токен " + localStorage.getItem('jwt'));
                 }
+                NProgress.done(true)
             }).catch((ex) => {
                 alert(ex.response.data)
                 console.log(ex.response.data)

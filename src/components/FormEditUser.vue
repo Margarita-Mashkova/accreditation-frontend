@@ -46,6 +46,7 @@
 
 <script>
 import UserService from '@/services/UserService';
+import NProgress from "nprogress";
 
 export default {
     data() {
@@ -73,6 +74,7 @@ export default {
                         this.opops += opop.name + ', '
                     }) */
                 }
+                NProgress.done(true)
             }).catch((ex) => {
                 alert(ex.response.data)
                 console.log(ex.response.data)
@@ -115,6 +117,9 @@ export default {
     created() {
         if (this.$route.params.id != null) {
             this.findUser()
+        }
+        else{
+            NProgress.done(true)
         }
     }
 }

@@ -48,6 +48,7 @@ import OpopService from '@/services/OpopService'
 import ValueService from '@/services/ValueService'
 import VariableService from '@/services/VariableService'
 import ProfileService from '@/services/ProfileService'
+import NProgress from "nprogress"
 
 export default {
     name: "InputDataPage",
@@ -82,6 +83,7 @@ export default {
                     this.variables = response.data
                     this.generateValuesList()
                 }
+                NProgress.done(true)
             })
         },
         generateValuesList() {
@@ -90,15 +92,13 @@ export default {
                 let val = { id: { opopId: '', variableKey: variable.key, date: '' }, value: '' }
                 this.valuesList.push(val)
             })
-
-            console.log(this.valuesList)
         },
         findValuesByOpopAndDate() {
             if (this.opopId != '') {
+                this.generateValuesList()
                 ValueService.findValuesByOpopAndDate(this.opopId, this.date).then(response => {
                     if (response.status == 200 && response.data.length > 0) {
                         this.valuesList = response.data
-                        console.log(this.valuesList)
                     }
                 }).catch((ex) => {
                     //alert(ex.response.data)
@@ -125,7 +125,6 @@ export default {
             ProfileService.me().then(response => {
                 if (response.status == 200) {
                     this.currentUser = response.data
-                    console.log(this.currentUser)
                     if (this.currentUser.role == "MANAGER" && this.currentUser.opops.length != 0) {
                         this.opopId = this.currentUser.opops[0].id
                         this.opopName = this.currentUser.opops[0].name

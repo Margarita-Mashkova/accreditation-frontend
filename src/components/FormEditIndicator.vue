@@ -106,6 +106,7 @@
 <script>
 import IndicatorService from '@/services/IndicatorService'
 import VariableService from '@/services/VariableService'
+import NProgress from "nprogress"
 
 export default {
     data() {
@@ -136,6 +137,7 @@ export default {
                     this.listRules = response.data.rules
                     this.rules = response.data.rules.length
                 }
+                NProgress.done(true)
             }).catch((ex) => {
                 alert(ex.response.data)
                 console.log(ex.response.data)
@@ -207,6 +209,9 @@ export default {
     created() {
         if (this.$route.params.key != null) {
             this.findIndicator()
+        }
+        else{
+            NProgress.done(true)
         }
     }
 }

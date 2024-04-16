@@ -75,6 +75,7 @@ import OpopService from '@/services/OpopService'
 import ReportService from '@/services/ReportService'
 import ValueService from '@/services/ValueService'
 import ProfileService from '@/services/ProfileService'
+import NProgress from "nprogress"
 
 export default {
     name: "CalculationPage",
@@ -115,18 +116,21 @@ export default {
                     if(this.existsDates.length != 0){
                         this.date = this.existsDates[0]
                     }
+                    NProgress.done(true)
                 }
             }).catch((ex) => {
                 console.log(ex)
             })
         },
         makeCalculationOpopReport() {
+            NProgress.start()
             this.reportData = {calculations:[]}
             this.isPerforming = true
             ReportService.makeCalculationOpopReport(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
                     this.reportData = response.data
                 }
+                NProgress.done(true)
             }).catch((ex) => {
                 //alert(ex.response.data)
                 console.log(ex.response.data)
