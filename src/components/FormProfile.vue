@@ -27,7 +27,8 @@ export default {
     },
     data() {
         return {
-            user: {}
+            user: {},
+            login: ''
         }
     },
     methods: {
@@ -36,6 +37,7 @@ export default {
                 if (response.status == 200) {
                     this.user = response.data
                     this.user.password = null
+                    this.login = this.user.login
                     console.log("токен " + localStorage.getItem('jwt'));
                 }
             }).catch((ex) => {
@@ -46,7 +48,16 @@ export default {
         save(){
             ProfileService.editProfile(this.user).then(response =>{
                 if (response.status == 200){
-                    alert("Данные успешно изменены!")
+                    if(this.login != this.user.login){
+                        localStorage.setItem("jwt", null)
+                        localStorage.setItem('role', null)
+                        alert("Данные успешно изменены! Необходимо заново авторизоваться.")
+                        window.location.href = '/auth'
+                    }
+                    else{
+                        alert("Данные успешно изменены!")
+                    }
+                    
                 }
             }).catch((ex) => {
                 //alert(ex.response.data)

@@ -42,7 +42,7 @@ export default {
                 })
                 .catch((ex) => {
                     this.wrongData = true;
-                    console.log(ex.response.data)
+                    console.log(ex)
                 });
             e.preventDefault();
         },

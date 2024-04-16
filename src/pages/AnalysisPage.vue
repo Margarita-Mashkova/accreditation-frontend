@@ -102,7 +102,7 @@
     </div>
 
     <div class="recommendation-container" v-if="calculations.length != 0 && isPerforming &&
-                (recommendationList.middle != '' || recommendationList.low != '')">
+            (recommendationList.middle != '' || recommendationList.low != '')">
         <div class="heading">
             <h4>Рекомендации</h4>
         </div>
@@ -240,7 +240,7 @@ export default {
             OpopService.findAllOpops().then(response => {
                 if (response.status == 200) {
                     this.opops = response.data
-                    if (this.currentUser.role == "DEAN") {
+                    if(this.opops.length != 0){
                         this.opopId = this.opops[0].id
                     }
                 }
@@ -260,7 +260,7 @@ export default {
                 }
             })
         },
-        loadDataforCharts(){
+        loadDataforCharts() {
             ReportService.makeAnalysisReport(this.opopId, this.dateStart, this.dateEnd).then(response => {
                 if (response.status == 200) {
                     this.indicatorsPreparedData = response.data
@@ -468,11 +468,13 @@ export default {
             ProfileService.me().then(response => {
                 if (response.status == 200) {
                     this.currentUser = response.data
-                    if (this.currentUser.role == "MANAGER") {
+                    if (this.currentUser.role == "MANAGER" && this.currentUser.opops.length != 0) {
                         this.opopId = this.currentUser.opops[0].id
                         this.opopName = this.currentUser.opops[0].name
                     }
-                    console.log(this.currentUser)
+                    if (this.currentUser.role == "DEAN") {
+                        this.findAllOpops()
+                    }
                 }
             })
         },
@@ -481,7 +483,6 @@ export default {
         this.me()
         this.dateStart = new Date().toJSON().split("T")[0]
         this.dateEnd = new Date().toJSON().split("T")[0]
-        this.findAllOpops()
     }
 };
 </script>

@@ -71,8 +71,9 @@ export default {
             OpopService.findOpop(this.$route.params.id).then(response =>{
                 if(response.status == 200){
                     this.opop = response.data
-                    this.findUserByLogin(this.opop.userLogin)
-                    console.log(this.opop)
+                    if(this.opop.userLogin != null){
+                        this.findUserByLogin(this.opop.userLogin)
+                    }
                 }
             }).catch((ex) => {
                 alert(ex.response.data)

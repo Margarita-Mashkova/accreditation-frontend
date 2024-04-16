@@ -33,7 +33,7 @@
     </div>
 
     <div id="click-expand"></div>
-    <div class="wrap-expand-table" v-if="reportData.length != 0">
+    <div class="wrap-expand-table" v-if="reportData.calculations.length != 0">
         <a href="#close">Свернуть</a><a href="#click-expand">Развернуть</a>
         <table>
             <thead>
@@ -64,7 +64,7 @@
         <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
     </div>
 
-    <div class="heading" v-if="reportData.length == 0 && isPerforming == true">
+    <div class="heading" v-if="reportData.calculations.length == 0 && isPerforming == true">
         <h4 style="margin-top: 150px;">Нет данных для указанного периода</h4>
     </div>
 </template>
@@ -86,7 +86,9 @@ export default {
             opops: [],
             date: '',
             opopId: '',
-            reportData: '',
+            reportData: {
+                calculations: []
+            },
             isPerforming: false,
             existsDates: [],
             currentUser: '',
@@ -98,7 +100,7 @@ export default {
             OpopService.findAllOpops().then(response => {
                 if (response.status == 200) {
                     this.opops = response.data
-                    if (this.currentUser.role == "DEAN") {
+                    if(this.opops.length != 0){
                         this.opopId = this.opops[0].id
                     }
                     //this.date = new Date().toJSON().split("T")[0]
@@ -110,14 +112,16 @@ export default {
             ValueService.findDatesByOpop(this.opopId).then(response => {
                 if (response.status == 200) {
                     this.existsDates = response.data
-                    this.date = this.existsDates[0]
+                    if(this.existsDates.length != 0){
+                        this.date = this.existsDates[0]
+                    }
                 }
             }).catch((ex) => {
                 console.log(ex)
             })
         },
         makeCalculationOpopReport() {
-            this.reportData = []
+            this.reportData = {calculations:[]}
             this.isPerforming = true
             ReportService.makeCalculationOpopReport(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
@@ -142,18 +146,19 @@ export default {
             ProfileService.me().then(response => {
                 if (response.status == 200) {
                     this.currentUser = response.data
-                    if (this.currentUser.role == "MANAGER") {
+                    if (this.currentUser.role == "MANAGER" && this.currentUser.opops.length != 0) {
                         this.opopId = this.currentUser.opops[0].id
                         this.opopName = this.currentUser.opops[0].name
                     }
-                    console.log(this.currentUser)
+                    if (this.currentUser.role == "DEAN") {
+                        this.findAllOpops()
+                    }
                 }
             })
         },
     },
     mounted() {
-        this.findAllOpops()
-        this.me()
+        this.me()      
     },
     watch: {
         'opopId'() {

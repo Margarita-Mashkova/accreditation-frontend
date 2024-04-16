@@ -13,6 +13,8 @@ import VariablesPage from "@/pages/VariablesPage";
 import InputDataPage from "@/pages/InputDataPage";
 import CalculationPage from "@/pages/CalculationPage";
 import AnalysisPage from "@/pages/AnalysisPage";
+import ForbiddenPage from "@/pages/ForbiddenPage";
+import NotFoundPage from "@/pages/NotFoundPage";
 
 const routes = [
     { path: "/auth", component: PageLogin, name: "login", alias: "/" },
@@ -49,6 +51,10 @@ const routes = [
     { path: "/input-data", component: InputDataPage, name: "input-data" },
     { path: "/calculation", component: CalculationPage, name: "calculation" },
     { path: "/analysis", component: AnalysisPage, name: "analysis" },
+
+    { path: "/forbidden", component: ForbiddenPage, name: "forbidden" },
+    { path: "/not-found", component: NotFoundPage, name: "not-found" },
+    { path: '/:pathMatch(.*)*', component: NotFoundPage, name: 'not-found' },
 ];
 
 let router = new VueRouter.createRouter({
@@ -56,4 +62,24 @@ let router = new VueRouter.createRouter({
     routes,
 });
 
+router.beforeEach((to, from, next) => {
+    // Если не авторизирован
+    if (localStorage.getItem('jwt') == 'null') {
+        if (to.path == '/auth') {
+            next()
+        }
+        else {
+            router.push("/auth")
+        }
+    }
+    // Если авторизирован
+    else {
+        if (to.path == '/') {
+            router.push("/edit-profile")
+        }
+        else {
+            next()
+        }
+    }
+})
 export default router;

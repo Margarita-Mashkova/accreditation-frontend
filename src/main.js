@@ -7,14 +7,14 @@ const token = localStorage.getItem('jwt')
 if (token) {
     axios.defaults.headers.common['Authorization'] = 'Bearer '+ token
 }
-/*axios.interceptors.response.use(null, function (error) {
+axios.interceptors.response.use(null, function (error) {
     if(error.response.status===403){
         router.push("/forbidden")
     }
     else if(error.response.status===404){
         router.push("/not-found")
     }
-});*/
+});
 
 createApp(App)
 .use(router)

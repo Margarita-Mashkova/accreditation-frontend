@@ -28,11 +28,11 @@
 
     <div class="variables-container">
         <div class="filter-item" v-for="(variable, index) in variables" :key="variable">
-            <!-- <input type="text" id="variableKey" :value="variable.key" v-bind="valuesList[index]">
+            <input type="text" id="variableKey" v-model="valuesList[index].id.variableKey" hidden="true">
             <label for="variableKey">
-                <span>{{ variable.key }}</span>
-            </label> -->
-            <label>{{ variable.key }}</label>
+                <span>{{ valuesList[index].id.variableKey }}</span>
+            </label>
+            <!-- <label>{{ variable.key }}</label> -->
             <input v-model="valuesList[index].value" class="input-simple-variable" type="text" placeholder="value">
         </div>
     </div>
@@ -70,10 +70,9 @@ export default {
             OpopService.findAllOpops().then(response => {
                 if (response.status == 200) {
                     this.opops = response.data
-                    if (this.currentUser.role == "DEAN") {
+                    if (this.opops.length != 0) {
                         this.opopId = this.opops[0].id
                     }
-                    this.date = new Date().toJSON().split("T")[0]
                 }
             })
         },
@@ -91,15 +90,15 @@ export default {
                 let val = { id: { opopId: '', variableKey: variable.key, date: '' }, value: '' }
                 this.valuesList.push(val)
             })
+
+            console.log(this.valuesList)
         },
         findValuesByOpopAndDate() {
             if (this.opopId != '') {
                 ValueService.findValuesByOpopAndDate(this.opopId, this.date).then(response => {
                     if (response.status == 200 && response.data.length > 0) {
                         this.valuesList = response.data
-                    }
-                    else {
-                        this.generateValuesList()
+                        console.log(this.valuesList)
                     }
                 }).catch((ex) => {
                     //alert(ex.response.data)
@@ -126,11 +125,14 @@ export default {
             ProfileService.me().then(response => {
                 if (response.status == 200) {
                     this.currentUser = response.data
-                    if (this.currentUser.role == "MANAGER") {
+                    console.log(this.currentUser)
+                    if (this.currentUser.role == "MANAGER" && this.currentUser.opops.length != 0) {
                         this.opopId = this.currentUser.opops[0].id
                         this.opopName = this.currentUser.opops[0].name
                     }
-                    console.log(this.currentUser)
+                    if (this.currentUser.role == "DEAN") {
+                        this.findAllOpops()
+                    }
                 }
             })
         },
@@ -139,16 +141,19 @@ export default {
         }
     },
     mounted() {
-        this.findAllOpops()
-        this.findAllVariables()
         this.me()
+        this.date = new Date().toJSON().split("T")[0]
+        this.findAllVariables()
     },
     watch: {
         'opopId'() {
             this.findValuesByOpopAndDate()
         },
         'date'() {
-            this.findValuesByOpopAndDate()
+            if (this.date != '') {
+                this.findValuesByOpopAndDate()
+            }
+
         }
     }
 };
