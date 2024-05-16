@@ -101,7 +101,7 @@ export default {
             OpopService.findAllOpops().then(response => {
                 if (response.status == 200) {
                     this.opops = response.data
-                    if(this.opops.length != 0){
+                    if (this.opops.length != 0) {
                         this.opopId = this.opops[0].id
                     }
                     //this.date = new Date().toJSON().split("T")[0]
@@ -113,7 +113,7 @@ export default {
             ValueService.findDatesByOpop(this.opopId).then(response => {
                 if (response.status == 200) {
                     this.existsDates = response.data
-                    if(this.existsDates.length != 0){
+                    if (this.existsDates.length != 0) {
                         this.date = this.existsDates[0]
                     }
                     NProgress.done(true)
@@ -124,7 +124,7 @@ export default {
         },
         makeCalculationOpopReport() {
             NProgress.start()
-            this.reportData = {calculations:[]}
+            this.reportData = { calculations: [] }
             this.isPerforming = true
             ReportService.makeCalculationOpopReport(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
@@ -139,23 +139,30 @@ export default {
         saveReport() {
             ReportService.saveCalculationOpopReportExcel(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
-                    alert("Отчет успешно сохранен в папку 'Загрузки' на Вашем компьютере")
-                    /* generateDiv.style.cssText = "display: none !important;"
-                    const url = window.URL.createObjectURL(response.data)
+                    const s2ab = (s) => {
+                        var buf = new ArrayBuffer(s.length);
+                        var view = new Uint8Array(buf);
+                        for (var i = 0; i !== s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                        return buf;
+                    };
+                    const decodedFileData = atob(response.data.data);
+                    const arrayBufferContent = s2ab(decodedFileData);
+                    const blob = new Blob([arrayBufferContent], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+                    const url = window.URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.style.display = 'none'
                     a.href = url
-                    a.download = 'Расчет_%s_%s.xlsx'
+                    a.download = response.data.filename
                     document.body.appendChild(a)
                     a.click()
-                    window.URL.revokeObjectURL(url) */
-                    
+                    window.URL.revokeObjectURL(url)
+
                 }
             }).catch((ex) => {
-                //alert(ex.response.data)
-                console.log(ex.response.data)
+                console.log(ex)
             })
         },
+
         me() {
             ProfileService.me().then(response => {
                 if (response.status == 200) {
@@ -172,7 +179,7 @@ export default {
         },
     },
     mounted() {
-        this.me()      
+        this.me()
     },
     watch: {
         'opopId'() {

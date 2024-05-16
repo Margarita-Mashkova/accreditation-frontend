@@ -464,7 +464,23 @@ export default {
         saveReport() {
             ReportService.saveAnalysisReportExcel(this.opopId, this.dateStart, this.dateEnd).then(response => {
                 if (response.status == 200) {
-                    alert("Отчет успешно сохранен в папку 'Загрузки' на Вашем компьютере")
+                    const s2ab = (s) => {
+                        var buf = new ArrayBuffer(s.length);
+                        var view = new Uint8Array(buf);
+                        for (var i = 0; i !== s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                        return buf;
+                    };
+                    const decodedFileData = atob(response.data.data);
+                    const arrayBufferContent = s2ab(decodedFileData);
+                    const blob = new Blob([arrayBufferContent], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+                    const url = window.URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.style.display = 'none'
+                    a.href = url
+                    a.download = response.data.filename
+                    document.body.appendChild(a)
+                    a.click()
+                    window.URL.revokeObjectURL(url)
                 }
             }).catch((ex) => {
                 //alert(ex.response.data)
