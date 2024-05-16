@@ -124,14 +124,14 @@
 </template>
 
 <script>
-import PageHeader from '@/components/PageHeader.vue'
-import LineChart from '@/components/LineChart.vue'
 import BarChart from '@/components/BarChart.vue'
+import LineChart from '@/components/LineChart.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import CalculationService from '@/services/CalculationService'
 import IndicatorService from '@/services/IndicatorService'
 import OpopService from '@/services/OpopService'
-import ReportService from '@/services/ReportService'
 import ProfileService from '@/services/ProfileService'
+import ReportService from '@/services/ReportService'
 import NProgress from "nprogress"
 
 export default {
@@ -156,6 +156,7 @@ export default {
             recommendationList: {},
             isPerforming: false,
             indicatorsPreparedData: [],
+            predictScores: {},
 
             chartIndicatorsValuesByYearsData: {
                 labels: [],
@@ -241,7 +242,7 @@ export default {
             OpopService.findAllOpops().then(response => {
                 if (response.status == 200) {
                     this.opops = response.data
-                    if(this.opops.length != 0){
+                    if (this.opops.length != 0) {
                         this.opopId = this.opops[0].id
                     }
                 }
@@ -262,14 +263,6 @@ export default {
                 }
             })
         },
-        loadDataforCharts() {
-            ReportService.makeAnalysisReport(this.opopId, this.dateStart, this.dateEnd).then(response => {
-                if (response.status == 200) {
-                    this.indicatorsPreparedData = response.data
-                    this.generateCharts()
-                }                
-            })
-        },
         findCalculationsByPeriod() {
             NProgress.start()
             this.showCharts = false
@@ -284,8 +277,9 @@ export default {
                             this.loadDataforCharts()
                             this.generateRecommendations()
                         }
+                        NProgress.done(true)
                     }
-                    NProgress.done(true)
+
                 }).catch((ex) => {
                     //alert(ex.response.data)
                     console.log(ex)
@@ -295,10 +289,18 @@ export default {
             }
 
         },
+        loadDataforCharts() {
+            ReportService.makeAnalysisReport(this.opopId, this.dateStart, this.dateEnd).then(response => {
+                if (response.status == 200) {
+                    this.indicatorsPreparedData = response.data
+                    this.generateCharts()
+                }
+            })
+        },
         generateCharts() {
             this.generateIndicatorsByYearsChart()
             this.generateScoresByYearsChart()
-            this.showCharts = true
+            //this.showCharts = true
         },
         generateIndicatorsByYearsChart() {
             this.chartIndicatorsValuesByYearsData = { labels: [], datasets: [] }
@@ -342,7 +344,6 @@ export default {
                 )
             })
         },
-
         generateScoresByYearsChart() {
             this.chartScoresByYearsData = { labels: [], datasets: [] }
             this.chartScoresByYearsOptions.plugins.title.text = 'Сравнение суммарного количества баллов по годам'
@@ -363,6 +364,7 @@ export default {
                 }
             )
         },
+
         prepareDataForScoresByYears() {
             // Сортировка вычисленных значений по дате ASC
             function sortByDate(a, b) {
@@ -405,6 +407,7 @@ export default {
             })
 
             let preparedData = { labels: dates, values: scores }
+            this.getPredict(preparedData)
             return preparedData;
         },
         calculateSum(calculations) {
@@ -483,6 +486,40 @@ export default {
                 }
             })
         },
+
+        getPredict(preparedData) {
+            var valuesScores = []
+            for (let i = 0; i < preparedData.labels.length; i++) {
+                var dateScore = preparedData.labels[i] + 'T00:00:01.000Z'
+                valuesScores.push({ date: dateScore, value: preparedData.values[i] })
+            }
+
+            var data = { originalTimeSeries: { values: valuesScores }, countForecast: 1 }
+            ReportService.getPredict(data).then(response => {
+                if (response.status == 200) {
+                    var predict = response.data.timeSeries.values[1]
+                    this.predictScores = { date: predict.date.split("T")[0], value: Math.round(predict.value) }
+
+                    this.chartScoresByYearsData.labels.push(this.predictScores.date)
+                    var data = new Array(this.chartScoresByYearsData.datasets[0].data.length).fill(NaN)
+                    console.log(data)
+                    data.push(this.predictScores.value)
+                    this.chartScoresByYearsData.datasets.push(
+                        {
+                            label: 'Суммарное количество баллов за аккредитацию (Прогноз)',
+                            data: data, //баллы
+
+                            tension: 0.2, /* степень изгиба линий */
+                            borderWidth: 1, /* толщина линий */
+                            pointHoverRadius: 4, /* радиус точки при наведении */
+                            spanGaps: false, /* если зачение отсутствует, линия прерывается */
+                            indexAxis: 'x', /* для транспонирования графика указать значение 'y' */
+                        }
+                    )
+                    this.showCharts = true
+                }
+            })
+        }
     },
     mounted() {
         this.me()
