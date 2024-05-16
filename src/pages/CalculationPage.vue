@@ -156,7 +156,6 @@ export default {
                     document.body.appendChild(a)
                     a.click()
                     window.URL.revokeObjectURL(url)
-
                 }
             }).catch((ex) => {
                 console.log(ex)
