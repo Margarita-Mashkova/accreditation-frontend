@@ -24,10 +24,20 @@ class ValueService{
         return axios.get(URL)
     }
 
+    getPatternFile(opopId, date){
+        let URL = VALUE_API_BASE_URL + '/patternFile?opopId=' + opopId + '&date=' + date 
+        return axios.get(URL)
+    }
+
     //POST
     addValuesList(valuesList){
         let URL = VALUE_API_BASE_URL + '/list'
         return axios.post(URL, valuesList)
+    }
+
+    readValuesFromFile(file, opopId, date){
+        let URL = VALUE_API_BASE_URL + '/readFile?opopId=' + opopId + '&date=' + date
+        return axios.postForm(URL, file)
     }
 
     //PUT

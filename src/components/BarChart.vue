@@ -8,7 +8,7 @@ import { Chart, registerables } from 'chart.js'
 Chart.register(...registerables);
 
 export default {
-    name: 'LineChart',
+    name: 'BarChart',
     components: { Bar },
     props: {
         options: Array,

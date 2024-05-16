@@ -22,8 +22,13 @@
     <div class="heading">
         <h4>Введите значения переменных:</h4>
     </div>
-    <div class="btn">
-        <button class="btn-simple" @click="loadFromFile()">Загрузить из файла</button>
+    <div class="btn-bar">
+        <button class="btn-simple" @click="getPatternFile()">Получить шаблон файла</button>
+        <!-- <button class="btn-simple" @click="loadFromFile()">Загрузить из файла</button> -->
+        <input @change="onFileChange" id="file" type="file" accept=".xlsx">
+        <label for="file" class="input-file-btn">
+            Загрузить из файла
+        </label>
     </div>
 
     <div class="variables-container">
@@ -37,7 +42,7 @@
         </div>
     </div>
 
-    <div class="btn">
+    <div class="btn-bar">
         <button class="btn-simple" @click="save()">Сохранить</button>
     </div>
 </template>
@@ -45,9 +50,9 @@
 <script>
 import PageHeader from '@/components/PageHeader.vue'
 import OpopService from '@/services/OpopService'
+import ProfileService from '@/services/ProfileService'
 import ValueService from '@/services/ValueService'
 import VariableService from '@/services/VariableService'
-import ProfileService from '@/services/ProfileService'
 import NProgress from "nprogress"
 
 export default {
@@ -63,10 +68,20 @@ export default {
             date: '',
             valuesList: [],
             currentUser: '',
-            opopName: ''
+            opopName: '',
+            notEnoughData: false,
+            file: null
         }
     },
     methods: {
+        onFileChange(e) {
+            var files = e.target.files || e.dataTransfer.files;
+            if (!files.length)
+                return;
+            this.file = files[0]
+            this.loadFromFile()
+        },
+
         findAllOpops() {
             OpopService.findAllOpops().then(response => {
                 if (response.status == 200) {
@@ -108,18 +123,26 @@ export default {
         },
         save() {
             this.valuesList.forEach((value) => {
-                value.id.opopId = this.opopId
-                value.id.date = this.date
-            })
-            console.log(this.valuesList)
-            ValueService.addValuesList(this.valuesList).then(response => {
-                if (response.status == 200) {
-                    alert("Данные добавлены")
+                if (value.value != '') {
+                    value.id.opopId = this.opopId
+                    value.id.date = this.date
+                } else {
+                    this.notEnoughData = true
                 }
-            }).catch((ex) => {
-                alert(ex.response.data)
-                console.log(ex.response.data)
             })
+            if (this.notEnoughData == false) {
+                ValueService.addValuesList(this.valuesList).then(response => {
+                    if (response.status == 200) {
+                        alert("Данные добавлены")
+                    }
+                }).catch((ex) => {
+                    alert(ex.response.data)
+                    console.log(ex.response.data)
+                })
+            }
+            else {
+                alert('Необходимо заполнить все значения переменных')
+            }
         },
         me() {
             ProfileService.me().then(response => {
@@ -135,8 +158,25 @@ export default {
                 }
             })
         },
+        getPatternFile() {
+            ValueService.getPatternFile(this.opopId, this.date).then(response => {
+                if (response.status == 200) {
+                    alert("Шаблон успешно сохранен в папку 'Загрузки' на Вашем компьютере")
+                }
+            }).catch((ex) => {
+                //alert(ex.response.data)
+                console.log(ex.response.data)
+            })
+        },
         loadFromFile() {
-            //TODO
+            ValueService.readValuesFromFile({ file: this.file }, this.opopId, this.date).then(response => {
+                if (response.status == 200) {
+                    this.valuesList = response.data
+                }
+            }).catch((ex) => {
+                //alert(ex.response)
+                console.log(ex)
+            })
         }
     },
     mounted() {
@@ -172,6 +212,32 @@ export default {
     min-width: 300px;
 }
 
+.input-file-btn {
+    font-family: "Century Gothic";
+    padding: 10px 80px;
+    color: white;
+    border-radius: 10px;
+    background-color: #3D3C84;
+    border: 1px solid;
+    border-color: #3D3C84;
+    text-align: center;
+    cursor: pointer;
+    font-size: 11pt;
+    min-width: 180px;
+}
+
+.input-file-btn:hover {
+    background-color: #28275c;
+}
+
+.btn-bar>input {
+    display: none;
+}
+
+.btn-bar>label {
+    margin: 0;
+}
+
 .input-simple-variable {
     padding: 10px;
     outline: none;
@@ -199,8 +265,14 @@ label {
     color: black;
 }
 
-.btn {
-    margin: 30px 680px;
+.btn-bar {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 20px 0px;
+}
+
+.btn-simple {
+    width: 300px;
 }
 
 thead {
@@ -222,10 +294,6 @@ td {
 .users {
     display: flex;
     justify-content: center;
-}
-
-.btn-bar {
-    display: flex;
 }
 
 .filter {

@@ -475,6 +475,7 @@ export default {
                     if (this.currentUser.role == "MANAGER" && this.currentUser.opops.length != 0) {
                         this.opopId = this.currentUser.opops[0].id
                         this.opopName = this.currentUser.opops[0].name
+                        NProgress.done(true)
                     }
                     if (this.currentUser.role == "DEAN") {
                         this.findAllOpops()

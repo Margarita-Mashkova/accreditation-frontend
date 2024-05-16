@@ -140,6 +140,16 @@ export default {
             ReportService.saveCalculationOpopReportExcel(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
                     alert("Отчет успешно сохранен в папку 'Загрузки' на Вашем компьютере")
+                    /* generateDiv.style.cssText = "display: none !important;"
+                    const url = window.URL.createObjectURL(response.data)
+                    const a = document.createElement('a')
+                    a.style.display = 'none'
+                    a.href = url
+                    a.download = 'Расчет_%s_%s.xlsx'
+                    document.body.appendChild(a)
+                    a.click()
+                    window.URL.revokeObjectURL(url) */
+                    
                 }
             }).catch((ex) => {
                 //alert(ex.response.data)
