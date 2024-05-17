@@ -79,6 +79,7 @@ export default {
     font-size: 11pt;
     font-weight: bold;
     padding: 20px 0px;
+    min-height: 32px;
 }
 
 .navbar-list {

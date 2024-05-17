@@ -10,40 +10,46 @@
     <div class="btn-left">
         <button class="btn-simple" @click="showVariables()">Переменные</button>
     </div>
-
-    <div class="indicators">
-        <table>
-            <thead>
-                <tr>
-                    <td>Обозначение</td>
-                    <td>Наименование</td>
-                    <td>Формула</td>
-                    <td>Действия</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="indicator in indicators" :key="indicator">
-                    <td>{{ indicator.key }}</td>
-                    <td><div class="text">{{ indicator.name }}</div></td>
-                    <td style="min-width: 100px;">{{ indicator.formula }}</td>
-                    <td>
-                        <div class="btn-bar">
-                            <button class="btn-simple-edit" @click="editIndicator(indicator.key)">Изменить</button>
-                            <button class="btn-simple-delete" @click="deleteIndicator(indicator.key)">Удалить</button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="btn-bar">
-        <div class="btn-page">
-            <button class="btn-simple" @click="previousPage()">&#9668;</button>
+    <Transition>
+        <div class="indicators" v-if="indicators.length > 0">
+            <table>
+                <thead>
+                    <tr>
+                        <td>Обозначение</td>
+                        <td>Наименование</td>
+                        <td>Формула</td>
+                        <td>Действия</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="indicator in indicators" :key="indicator">
+                        <td>{{ indicator.key }}</td>
+                        <td>
+                            <div class="text">{{ indicator.name }}</div>
+                        </td>
+                        <td style="min-width: 100px;">{{ indicator.formula }}</td>
+                        <td>
+                            <div class="btn-bar">
+                                <button class="btn-simple-edit" @click="editIndicator(indicator.key)">Изменить</button>
+                                <button class="btn-simple-delete"
+                                    @click="deleteIndicator(indicator.key)">Удалить</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="btn-page">
-            <button class="btn-simple" @click="nextPage()">&#9658;</button>
+    </Transition>
+    <Transition>
+        <div class="btn-bar" v-if="indicators.length > 0">
+            <div class="btn-page">
+                <button class="btn-simple" @click="previousPage()">&#9668;</button>
+            </div>
+            <div class="btn-page">
+                <button class="btn-simple" @click="nextPage()">&#9658;</button>
+            </div>
         </div>
-    </div>
+    </Transition>
 </template>
 
 <script>
@@ -67,7 +73,7 @@ export default {
         showVariables() {
             this.$router.push("/variables")
         },
-        getAmountPages(){
+        getAmountPages() {
             IndicatorService.getAmountPages().then(response => {
                 if (response.status == 200) {
                     this.amountPages = response.data
@@ -94,6 +100,9 @@ export default {
             if (sure) {
                 IndicatorService.deleteIndicator(key).then(response => {
                     if (response.status == 200) {
+                        if (this.indicators.length - 1 == 0 && this.pageNumber > 1) {
+                            this.pageNumber -= 1
+                        }
                         this.findAllIndicatorsByPage()
                     }
                 }).catch((ex) => {
@@ -113,7 +122,7 @@ export default {
             }
         }
     },
-    mounted() {        
+    mounted() {
         this.findAllIndicatorsByPage()
     },
     watch: {
@@ -155,20 +164,20 @@ table,
 td {
     color: black;
     min-width: 80%;
-    margin: 0px 140px;    
+    margin: 0px 140px;
 }
 
 td {
     padding: 10px 50px;
-    border-bottom: 1px solid #3D3C84;    
+    border-bottom: 1px solid #3D3C84;
 }
 
-.text{
-	overflow: hidden;
-	text-overflow: ellipsis;
-	display: -webkit-box;
-	-webkit-line-clamp: 3;
-	-webkit-box-orient: vertical;
+.text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     height: 60px;
 }
 

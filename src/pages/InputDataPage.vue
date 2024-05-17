@@ -4,16 +4,17 @@
         <h4>Ввод данных для расчета</h4>
     </div>
     <div class="filter">
-        <div class="filter-item" v-if="currentUser.role == 'DEAN'">
-            <label>ОПОП</label>
-            <select class="input-simple" v-model="opopId">
-                <option v-for="opop in opops" :key="opop" :value="opop.id">{{ opop.name }}</option>
-            </select>
-        </div>
-        <div class="filter-item" v-else>
-            <label>ОПОП</label>
-            <input v-model="opopName" class="input-simple" type="text" disabled>
-        </div>
+            <div class="filter-item" v-if="currentUser.role == 'DEAN'">
+                <label>ОПОП</label>
+                <select class="input-simple" v-model="opopId">
+                    <option v-for="opop in opops" :key="opop" :value="opop.id">{{ opop.name }}</option>
+                </select>
+            </div>
+
+            <div class="filter-item" v-else>
+                <label>ОПОП</label>
+                <input v-model="opopName" class="input-simple" type="text" disabled>
+            </div>
         <div class="filter-item">
             <label>Дата</label>
             <input v-model="date" class="input-simple" type="date">
@@ -30,21 +31,23 @@
             Загрузить из файла
         </label>
     </div>
-
-    <div class="variables-container">
-        <div class="filter-item" v-for="(variable, index) in variables" :key="variable">
-            <input type="text" id="variableKey" v-model="valuesList[index].id.variableKey" hidden="true">
-            <label for="variableKey">
-                <span>{{ valuesList[index].id.variableKey }}</span>
-            </label>
-            <!-- <label>{{ variable.key }}</label> -->
-            <input v-model="valuesList[index].value" class="input-simple-variable" type="text" placeholder="value">
+    <Transition>
+        <div class="variables-container" v-if="this.variables.length != 0">
+            <div class="filter-item" v-for="(variable, index) in variables" :key="variable">
+                <input type="text" id="variableKey" v-model="valuesList[index].id.variableKey" hidden="true">
+                <label for="variableKey">
+                    <span>{{ valuesList[index].id.variableKey }}</span>
+                </label>
+                <!-- <label>{{ variable.key }}</label> -->
+                <input v-model="valuesList[index].value" class="input-simple-variable" type="text" placeholder="value">
+            </div>
         </div>
-    </div>
-
-    <div class="btn-bar">
-        <button class="btn-simple" @click="save()">Сохранить</button>
-    </div>
+    </Transition>
+    <Transition>
+        <div class="btn-bar" v-if="this.variables.length != 0">
+            <button class="btn-simple" @click="save()">Сохранить</button>
+        </div>
+    </Transition>
 </template>
 
 <script>

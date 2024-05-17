@@ -64,8 +64,7 @@ export default {
                     this.opopUser = response.data
                 }
             }).catch((ex) => {
-                alert(ex.response.data)
-                console.log(ex.response.data)
+                console.log(ex)
             })
         },
         findOpop(){
@@ -78,8 +77,7 @@ export default {
                 }
                 NProgress.done(true)
             }).catch((ex) => {
-                alert(ex.response.data)
-                console.log(ex.response.data)
+                console.log(ex)
             })
         },
         addOpop() {
@@ -88,8 +86,7 @@ export default {
                     this.$router.push("/opops")
                 }
             }).catch((ex) => {
-                alert(ex.response.data)
-                console.log(ex.response.data)
+                console.log(ex)
             })
         },
         updateOpop(){
@@ -99,8 +96,7 @@ export default {
                     this.$router.push("/opops")
                 }
             }).catch((ex) => {
-                alert(ex.response.data)
-                console.log(ex.response.data)
+                console.log(ex)
             })
         },
         save() {

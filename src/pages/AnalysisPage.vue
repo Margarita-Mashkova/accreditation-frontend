@@ -35,49 +35,65 @@
     </div>
 
     <div id="click-expand"></div>
-    <div class="wrap-expand-table" v-if="calculations.length != 0">
-        <a href="#close">Свернуть</a><a href="#click-expand">Развернуть</a>
-        <table>
-            <thead>
-                <tr>
-                    <td>Наименование показателя</td>
-                    <td>Обозначение показателя</td>
-                    <td>Дата мониторинга</td>
-                    <td>Значение</td>
-                    <td>Баллы</td>
-                    <td>Планирование</td>
-                </tr>
-            </thead>
-            <tbody v-if="calculations.length != 0">
-                <tr v-for="calculation in calculations" :key="calculation">
-                    <td>
-                        <div class="text">{{ calculation.indicatorName }}</div>
-                    </td>
-                    <td>{{ calculation.id.indicatorKey }}</td>
-                    <td>{{ calculation.id.date }}</td>
-                    <td>{{ calculation.value }}</td>
-                    <td>{{ calculation.score }}</td>
-                    <td>{{ calculation.planned }}</td>
-                </tr>
-            </tbody>
-        </table>
-        <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
-    </div>
-    <div class="heading" v-if="calculations.length == 0 && isPerforming">
-        <h4 style="margin-top: 150px;">Нет данных для указанного периода</h4>
-    </div>
-
-    <div class="filter" v-if="calculations.length != 0 && isPerforming">
-        <div class="filter-item">
-            <label>Тип графиков</label>
-            <select class="input-simple" v-model="chartType">
-                <option :value="'Line'">Линейный</option>
-                <option :value="'Bar'">Столбчатый</option>
-            </select>
+    <Transition>
+        <div class="wrap-expand-table" v-if="calculations.length != 0">
+            <a href="#close">Свернуть</a><a href="#click-expand">Развернуть</a>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Наименование показателя</td>
+                        <td>Обозначение показателя</td>
+                        <td>Дата мониторинга</td>
+                        <td>Значение</td>
+                        <td>Баллы</td>
+                        <td>Планирование</td>
+                    </tr>
+                </thead>
+                <tbody v-if="calculations.length != 0">
+                    <tr v-for="calculation in calculations" :key="calculation">
+                        <td>
+                            <div class="text">{{ calculation.indicatorName }}</div>
+                        </td>
+                        <td>{{ calculation.id.indicatorKey }}</td>
+                        <td>{{ calculation.id.date }}</td>
+                        <td>{{ calculation.value }}</td>
+                        <td>{{ calculation.score }}</td>
+                        <td>{{ calculation.planned }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
         </div>
+    </Transition>
+
+    <Transition>
+        <div class="heading" v-if="calculations.length == 0 && isPerforming">
+            <h4 style="margin-top: 150px;">Нет данных для указанного периода</h4>
+        </div>
+    </Transition>
+
+    <Transition>
+        <div class="filter" v-if="calculations.length != 0 && isPerforming">
+            <div class="filter-item">
+                <label>Тип графиков</label>
+                <select class="input-simple" v-model="chartType">
+                    <option :value="'Line'">Линейный</option>
+                    <option :value="'Bar'">Столбчатый</option>
+                </select>
+            </div>
+        </div>
+    </Transition>
+
+    <!-- График сравнения суммарного кол-ва баллов по годам -->
+    <div class="chart-list" v-if="showCharts === true && chartType === 'Line'">
+        <LineChart :data="this.chartScoresByYearsData" :options="this.chartScoresByYearsOptions" />
+    </div>
+    <div class="chart-list" v-if="showCharts === true && chartType === 'Bar'">
+        <BarChart :data="this.chartScoresByYearsData" :options="this.chartScoresByYearsOptions" />
     </div>
 
     <!-- График сравнения значений показателей по годам -->
+
     <div class="chart-list" v-if="showCharts === true && chartType === 'Line'">
         <LineChart :data="this.chartIndicatorsValuesByYearsData" :options="this.chartIndicatorsValuesByYearsOptions" />
     </div>
@@ -93,34 +109,30 @@
         <BarChart :data="this.chartIndicatorsScoresByYearsData" :options="this.chartIndicatorsScoresByYearsOptions" />
     </div>
 
-    <!-- График сравнения суммарного кол-ва баллов по годам -->
-    <div class="chart-list" v-if="showCharts === true && chartType === 'Line'">
-        <LineChart :data="this.chartScoresByYearsData" :options="this.chartScoresByYearsOptions" />
-    </div>
-    <div class="chart-list" v-if="showCharts === true && chartType === 'Bar'">
-        <BarChart :data="this.chartScoresByYearsData" :options="this.chartScoresByYearsOptions" />
-    </div>
-
-    <div class="recommendation-container" v-if="calculations.length != 0 && isPerforming &&
+    <Transition>
+        <div class="recommendation-container" v-if="calculations.length != 0 && isPerforming &&
             (recommendationList.middle != '' || recommendationList.low != '')">
-        <div class="heading">
-            <h4>Рекомендации</h4>
-        </div>
-        <div class="recommendation">
-            <text>Следует обратить внимание на следующие показатели, т.к. на текущий <i><u>{{ this.nowYear }} г.</u></i>
-                они имеют
-                недостаточно высокий уровень баллов:<br></text>
-            <div v-if="recommendationList.middle != ''">
-                <text style="color: #ff8f00"><b><u>Средний</u></b></text><text> уровень значений имеют показатели:
-                </text>
-                <text><i><b>{{ recommendationList.middle }}</b></i>.</text>
+            <div class="heading">
+                <h4>Рекомендации</h4>
             </div>
-            <div v-if="recommendationList.low != ''">
-                <text style="color: red"><b><u>Низкий</u></b></text><text> уровень значений имеют показатели: </text>
-                <text><i><b>{{ recommendationList.low }}</b></i>.</text>
+            <div class="recommendation">
+                <text>Следует обратить внимание на следующие показатели, т.к. на текущий <i><u>{{ this.nowYear }}
+                            г.</u></i>
+                    они имеют
+                    недостаточно высокий уровень баллов:<br></text>
+                <div v-if="recommendationList.middle != ''">
+                    <text style="color: #ff8f00"><b><u>Средний</u></b></text><text> уровень значений имеют показатели:
+                    </text>
+                    <text><i><b>{{ recommendationList.middle }}</b></i>.</text>
+                </div>
+                <div v-if="recommendationList.low != ''">
+                    <text style="color: red"><b><u>Низкий</u></b></text><text> уровень значений имеют показатели:
+                    </text>
+                    <text><i><b>{{ recommendationList.low }}</b></i>.</text>
+                </div>
             </div>
         </div>
-    </div>
+    </Transition>
 </template>
 
 <script>
@@ -246,7 +258,6 @@ export default {
                         this.opopId = this.opops[0].id
                     }
                 }
-                NProgress.done(true)
             })
         },
         findAllIndicators() {
@@ -254,7 +265,7 @@ export default {
                 if (response.status == 200) {
                     this.amountIndicators = response.data.length
                     let amountYears = this.calculations.length / this.amountIndicators
-                    if (amountYears > 1) {
+                    if (amountYears > 2) {
                         this.chartType = 'Line'
                     }
                     else {
@@ -264,9 +275,9 @@ export default {
             })
         },
         findCalculationsByPeriod() {
-            NProgress.start()
             this.showCharts = false
             this.isPerforming = true
+            this.recommendationList = []
             if (this.dateStart <= this.dateEnd) {
                 CalculationService.findCalculationsByPeriod(this.opopId, this.dateStart, this.dateEnd).then(response => {
                     if (response.status == 200) {
@@ -277,7 +288,6 @@ export default {
                             this.loadDataforCharts()
                             this.generateRecommendations()
                         }
-                        NProgress.done(true)
                     }
 
                 }).catch((ex) => {
@@ -483,7 +493,6 @@ export default {
                     window.URL.revokeObjectURL(url)
                 }
             }).catch((ex) => {
-                //alert(ex.response.data)
                 console.log(ex.response.data)
             })
         },
@@ -494,7 +503,6 @@ export default {
                     if (this.currentUser.role == "MANAGER" && this.currentUser.opops.length != 0) {
                         this.opopId = this.currentUser.opops[0].id
                         this.opopName = this.currentUser.opops[0].name
-                        NProgress.done(true)
                     }
                     if (this.currentUser.role == "DEAN") {
                         this.findAllOpops()
@@ -513,25 +521,28 @@ export default {
             var data = { originalTimeSeries: { values: valuesScores }, countForecast: 1 }
             ReportService.getPredict(data).then(response => {
                 if (response.status == 200) {
-                    var predict = response.data.timeSeries.values[1]
-                    this.predictScores = { date: predict.date.split("T")[0], value: Math.round(predict.value) }
+                    console.log(response.data)
+                    if (response.data.timeSeries != null) {
+                        var predict = response.data.timeSeries.values[1]
+                        this.predictScores = { date: predict.date.split("T")[0], value: Math.round(predict.value) }
 
-                    this.chartScoresByYearsData.labels.push(this.predictScores.date)
-                    var data = new Array(this.chartScoresByYearsData.datasets[0].data.length).fill(NaN)
-                    console.log(data)
-                    data.push(this.predictScores.value)
-                    this.chartScoresByYearsData.datasets.push(
-                        {
-                            label: 'Суммарное количество баллов за аккредитацию (Прогноз)',
-                            data: data, //баллы
+                        this.chartScoresByYearsData.labels.push(this.predictScores.date)
+                        var data = new Array(this.chartScoresByYearsData.datasets[0].data.length).fill(NaN)
+                        console.log(data)
+                        data.push(this.predictScores.value)
+                        this.chartScoresByYearsData.datasets.push(
+                            {
+                                label: 'Суммарное количество баллов за аккредитацию (Прогноз)',
+                                data: data, //баллы
 
-                            tension: 0.2, /* степень изгиба линий */
-                            borderWidth: 1, /* толщина линий */
-                            pointHoverRadius: 4, /* радиус точки при наведении */
-                            spanGaps: false, /* если зачение отсутствует, линия прерывается */
-                            indexAxis: 'x', /* для транспонирования графика указать значение 'y' */
-                        }
-                    )
+                                tension: 0.2, /* степень изгиба линий */
+                                borderWidth: 1, /* толщина линий */
+                                pointHoverRadius: 4, /* радиус точки при наведении */
+                                spanGaps: false, /* если зачение отсутствует, линия прерывается */
+                                indexAxis: 'x', /* для транспонирования графика указать значение 'y' */
+                            }
+                        )
+                    }
                     this.showCharts = true
                 }
             })
@@ -541,6 +552,12 @@ export default {
         this.me()
         this.dateStart = new Date().toJSON().split("T")[0]
         this.dateEnd = new Date().toJSON().split("T")[0]
+        NProgress.done(true)
+    },
+    watch: {
+        '$route'() {
+            NProgress.done(true)
+        }
     }
 };
 </script>

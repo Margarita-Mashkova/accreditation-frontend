@@ -33,40 +33,44 @@
     </div>
 
     <div id="click-expand"></div>
-    <div class="wrap-expand-table" v-if="reportData.calculations.length != 0">
-        <a href="#close">Свернуть</a><a href="#click-expand">Развернуть</a>
-        <table>
-            <thead>
-                <tr>
-                    <td>Наименование показателя</td>
-                    <td>Обозначение показателя</td>
-                    <td>Значение</td>
-                    <td>Баллы</td>
-                </tr>
-            </thead>
-            <tbody v-if="reportData.length != 0">
-                <tr v-for=" calculation in reportData.calculations" :key="calculation">
-                    <td>
-                        <div class="text">{{ calculation.indicatorName }}</div>
-                    </td>
-                    <td>{{ calculation.id.indicatorKey }}</td>
-                    <td>{{ calculation.value }}</td>
-                    <td>{{ calculation.score }}</td>
-                </tr>
-                <tr>
-                    <td><b>Итого</b></td>
-                    <td></td>
-                    <td><b>{{ reportData.accreditationStatus }}</b></td>
-                    <td class="summary-td"><b>{{ reportData.sum }} баллов</b></td>
-                </tr>
-            </tbody>
-        </table>
-        <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
-    </div>
+    <Transition>
+        <div class="wrap-expand-table" v-if="reportData.calculations.length != 0">
+            <a href="#close">Свернуть</a><a href="#click-expand">Развернуть</a>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Наименование показателя</td>
+                        <td>Обозначение показателя</td>
+                        <td>Значение</td>
+                        <td>Баллы</td>
+                    </tr>
+                </thead>
+                <tbody v-if="reportData.length != 0">
+                    <tr v-for=" calculation in reportData.calculations" :key="calculation">
+                        <td>
+                            <div class="text">{{ calculation.indicatorName }}</div>
+                        </td>
+                        <td>{{ calculation.id.indicatorKey }}</td>
+                        <td>{{ calculation.value }}</td>
+                        <td>{{ calculation.score }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Итого</b></td>
+                        <td></td>
+                        <td><b>{{ reportData.accreditationStatus }}</b></td>
+                        <td class="summary-td"><b>{{ reportData.sum }} баллов</b></td>
+                    </tr>
+                </tbody>
+            </table>
+            <a href="#close">Cвернуть</a><a href="#click-expand">Посмотреть весь список</a>
+        </div>
+    </Transition>
 
-    <div class="heading" v-if="reportData.calculations.length == 0 && isPerforming == true">
-        <h4 style="margin-top: 150px;">Нет данных для указанного периода</h4>
-    </div>
+    <Transition>
+        <div class="heading" v-if="reportData.calculations.length == 0 && isPerforming == true">
+            <h4 style="margin-top: 150px;">Нет данных для указанного периода</h4>
+        </div>
+    </Transition>
 </template>
 
 <script>
@@ -116,21 +120,18 @@ export default {
                     if (this.existsDates.length != 0) {
                         this.date = this.existsDates[0]
                     }
-                    NProgress.done(true)
                 }
             }).catch((ex) => {
                 console.log(ex)
             })
         },
         makeCalculationOpopReport() {
-            NProgress.start()
             this.reportData = { calculations: [] }
             this.isPerforming = true
             ReportService.makeCalculationOpopReport(this.opopId, this.date).then(response => {
                 if (response.status == 200) {
                     this.reportData = response.data
                 }
-                NProgress.done(true)
             }).catch((ex) => {
                 //alert(ex.response.data)
                 console.log(ex.response.data)
@@ -156,6 +157,7 @@ export default {
                     document.body.appendChild(a)
                     a.click()
                     window.URL.revokeObjectURL(url)
+
                 }
             }).catch((ex) => {
                 console.log(ex)
@@ -179,10 +181,14 @@ export default {
     },
     mounted() {
         this.me()
+        NProgress.done(true)
     },
     watch: {
         'opopId'() {
             this.findAllDates()
+        },
+        '$route'() {
+            NProgress.done(true)
         }
     }
 };
