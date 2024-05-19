@@ -133,8 +133,7 @@ export default {
                     this.reportData = response.data
                 }
             }).catch((ex) => {
-                //alert(ex.response.data)
-                console.log(ex.response.data)
+                console.log(ex)
             })
         },
         saveReport() {

@@ -22,6 +22,11 @@ class ReportService {
         return axios.get(URL)
     }
 
+    getManualWord(userRole){
+        let URL = REPORT_API_BASE_URL + '/manual?userRole=' + userRole
+        return axios.get(URL)
+    }
+
     getPredict(data){
         let URL = 'http://time-series.athene.tech/api/1.0/getForecast'
         return axios.post(URL, data)

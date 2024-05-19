@@ -38,7 +38,7 @@ export default {
                         console.log("токен " + response.data);
                         localStorage.setItem("jwt", response.data);                        
                     }
-                    window.location.href = '/edit-profile';
+                    window.location.href = '/home';
                 })
                 .catch((ex) => {
                     this.wrongData = true;

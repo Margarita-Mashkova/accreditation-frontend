@@ -2,6 +2,8 @@ import * as VueRouter from "vue-router";
 import NProgress from 'nprogress';
 
 import PageLogin from "@/pages/LoginPage";
+import PageHome from "@/pages/HomePage.vue";
+import PageManual from "@/pages/ManualPage.vue";
 import PageUsers from "@/pages/UsersPage";
 import ProfilePage from "@/pages/ProfilePage";
 import EditUserPage from "@/pages/EditUserPage";
@@ -19,6 +21,8 @@ import NotFoundPage from "@/pages/NotFoundPage";
 
 const routes = [
     { path: "/auth", component: PageLogin, name: "login", alias: "/" },
+    { path: "/home", component: PageHome, name: "home" },
+    { path: "/manual", component: PageManual, name: "manual" },
     { path: "/edit-profile", component: ProfilePage, name: "edit-profile" },
 
     { path: "/users", component: PageUsers, name: "users" },

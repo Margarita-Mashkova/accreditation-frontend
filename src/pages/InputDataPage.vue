@@ -25,7 +25,6 @@
     </div>
     <div class="btn-bar">
         <button class="btn-simple" @click="getPatternFile()">Получить шаблон файла</button>
-        <!-- <button class="btn-simple" @click="loadFromFile()">Загрузить из файла</button> -->
         <input @change="onFileChange" id="file" type="file" accept=".xlsx">
         <label for="file" class="input-file-btn">
             Загрузить из файла
@@ -115,12 +114,11 @@ export default {
             if (this.opopId != '') {
                 this.generateValuesList()
                 ValueService.findValuesByOpopAndDate(this.opopId, this.date).then(response => {
-                    if (response.status == 200 && response.data.length > 0) {
+                    if (response.status == 200 && response.data.length == this.variables.length) {
                         this.valuesList = response.data
                     }
                 }).catch((ex) => {
-                    //alert(ex.response.data)
-                    console.log(ex.response.data)
+                    console.log(ex)
                 })
             }
         },

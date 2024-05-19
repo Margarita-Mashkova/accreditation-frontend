@@ -39,12 +39,10 @@ export default {
                     this.user = response.data
                     this.user.password = null
                     this.login = this.user.login
-                    console.log("токен " + localStorage.getItem('jwt'));
                 }
                 NProgress.done(true)
             }).catch((ex) => {
-                alert(ex.response.data)
-                console.log(ex.response.data)
+                console.log(ex)
             })
         },
         save(){
@@ -62,10 +60,8 @@ export default {
                     
                 }
             }).catch((ex) => {
-                //alert(ex.response.data)
-                console.log(ex.response.data)
+                console.log(ex)
             })
-            console.log(this.user)
         }
     },
     mounted() {

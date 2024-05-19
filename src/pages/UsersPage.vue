@@ -6,48 +6,51 @@
     <div class="btn">
         <button class="btn-simple" @click="openCreateUserFrom()">Создать</button>
     </div>
-
-    <div class="users">
-        <table>
-            <thead>
-                <tr>
-                    <td>ID</td>
-                    <td>Фамилия</td>
-                    <td>Имя</td>
-                    <td>Отчество</td>
-                    <td>Логин</td>
-                    <td>Роль</td>
-                    <!-- <td>ОПОП</td> -->
-                    <td>Действия</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="user in users" v-bind:key="user">
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.surname }}</td>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.patronymic }}</td>
-                    <td>{{ user.login }}</td>
-                    <td>{{ user.role }}</td>
-                    <!-- <td> <label v-for="opop in user.opops" v-bind:key="opop">{{ opop.name }}<br></label></td> -->
-                    <td>
-                        <div class="btn-bar">
-                            <button class="btn-simple-edit" @click="editUser(user.id)">Изменить</button>
-                            <button class="btn-simple-delete" @click="deleteUser(user.id)">Удалить</button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div class="btn-bar">
-        <div class="btn-page">
-            <button class="btn-simple" @click="previousPage()">&#9668;</button>
+    <Transition>
+        <div class="users" v-if="this.users.length > 0">
+            <table>
+                <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>Фамилия</td>
+                        <td>Имя</td>
+                        <td>Отчество</td>
+                        <td>Логин</td>
+                        <td>Роль</td>
+                        <!-- <td>ОПОП</td> -->
+                        <td>Действия</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="user in users" v-bind:key="user">
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.surname }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.patronymic }}</td>
+                        <td>{{ user.login }}</td>
+                        <td>{{ user.role }}</td>
+                        <!-- <td> <label v-for="opop in user.opops" v-bind:key="opop">{{ opop.name }}<br></label></td> -->
+                        <td>
+                            <div class="btn-bar">
+                                <button class="btn-simple-edit" @click="editUser(user.id)">Изменить</button>
+                                <button class="btn-simple-delete" @click="deleteUser(user.id)">Удалить</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="btn-page">
-            <button class="btn-simple" @click="nextPage()">&#9658;</button>
+    </Transition>
+    <Transition>
+        <div class="btn-bar" v-if="this.users.length > 0">
+            <div class="btn-page">
+                <button class="btn-simple" @click="previousPage()">&#9668;</button>
+            </div>
+            <div class="btn-page">
+                <button class="btn-simple" @click="nextPage()">&#9658;</button>
+            </div>
         </div>
-    </div>
+    </Transition>
 </template>
 
 <script>
@@ -68,7 +71,7 @@ export default {
         PageHeader
     },
     methods: {
-        getAmountPages(){
+        getAmountPages() {
             UserService.getAmountPages().then(response => {
                 if (response.status == 200) {
                     this.amountPages = response.data

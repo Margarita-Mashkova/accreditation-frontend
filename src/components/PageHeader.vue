@@ -2,6 +2,10 @@
     <div class="navbar">
         <ul class="navbar-list">
 
+            <li v-if="this.user.role == 'DEAN' || this.user.role == 'MANAGER' || this.user.role == 'ADMIN'">
+                <router-link :to="'/home'">Главная</router-link>
+            </li>
+
             <li v-if="this.user.role == 'ADMIN'">
                 <router-link :to="'/users'">Пользователи</router-link>
             </li>
@@ -26,6 +30,9 @@
             </li>
 
             <div class="navbar-item-last">
+                <li>
+                    <router-link :to="'/manual'">Руководство</router-link>
+                </li>
                 <li>
                     <router-link :to="'/edit-profile'">Личные данные</router-link>
                 </li>
