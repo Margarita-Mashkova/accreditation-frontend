@@ -57,7 +57,7 @@
                     <tr>
                         <td><b>Итого</b></td>
                         <td></td>
-                        <td><b>{{ reportData.accreditationStatus }}</b></td>
+                        <td><b id="accreditation-status">{{ reportData.accreditationStatus }}</b></td>
                         <td class="summary-td"><b>{{ reportData.sum }} баллов</b></td>
                     </tr>
                 </tbody>
