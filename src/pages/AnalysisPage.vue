@@ -472,6 +472,7 @@ export default {
             this.recommendationList = { middle: middleScore.join(", "), low: lowScore.join(", ") }
         },
         saveReport() {
+            this.isPerforming = true
             ReportService.saveAnalysisReportExcel(this.opopId, this.dateStart, this.dateEnd).then(response => {
                 if (response.status == 200) {
                     const s2ab = (s) => {
@@ -493,7 +494,7 @@ export default {
                     window.URL.revokeObjectURL(url)
                 }
             }).catch((ex) => {
-                console.log(ex.response.data)
+                console.log(ex)
             })
         },
         me() {
