@@ -522,14 +522,12 @@ export default {
             var data = { originalTimeSeries: { values: valuesScores }, countForecast: 1 }
             ReportService.getPredict(data).then(response => {
                 if (response.status == 200) {
-                    console.log(response.data)
                     if (response.data.timeSeries != null) {
                         var predict = response.data.timeSeries.values[1]
                         this.predictScores = { date: predict.date.split("T")[0], value: Math.round(predict.value) }
 
                         this.chartScoresByYearsData.labels.push(this.predictScores.date)
                         var data = new Array(this.chartScoresByYearsData.datasets[0].data.length).fill(NaN)
-                        console.log(data)
                         data.push(this.predictScores.value)
                         this.chartScoresByYearsData.datasets.push(
                             {
@@ -546,6 +544,9 @@ export default {
                     }
                     this.showCharts = true
                 }
+            }).catch((ex) => {
+                this.showCharts = true
+                console.log(ex)
             })
         }
     },
